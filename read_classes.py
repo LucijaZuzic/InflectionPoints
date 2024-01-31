@@ -1,24 +1,107 @@
-from utilities import *
-import seaborn as sns
+from utilities import * 
+
+def save_distances(all_dict, markers_d, begin_name):
+ 
+    list_keys = sorted([str(m) for m in list(all_dict[ws].keys())])
+
+    print(len(list_keys))
+  
+    strpr = "vehicle;ride;ws"
+
+    for mrk in list_keys:
+
+        strpr += ";" + mrk 
+
+    strpr += "\n"
+
+    for subdir_name in markers_d[ws]:
+
+        for short_name in markers_d[ws][subdir_name]:
+
+            strpr += subdir_name + ";" + short_name + ";" + str(ws)
+
+            for mrk in list_keys:
+
+                cnt = 0
+
+                if mrk in markers_d[ws][subdir_name][short_name]:
+
+                    cnt = markers_d[ws][subdir_name][short_name][mrk]
+ 
+                strpr += ";" + str(cnt)
+  
+            strpr += "\n"
+
+    dirname = "marker_count/" + begin_name
+
+    if not os.path.isdir(dirname):
+
+        os.makedirs(dirname)
+
+    file_distances = open(dirname + "/marker_" + begin_name + "_" + str(ws) + ".csv", "w")
+    
+    file_distances.write(strpr)
+
+    file_distances.close()
 
 all_subdirs = os.listdir() 
    
 all_markers_dict = dict()
 
-markers_dict = dict()
+all_markers_converted_dict = dict()
+
+all_markers_anom_dict = dict() 
+
+markers_dict = dict() 
+
+markers_percent_dict = dict()
+
+markers_converted_dict = dict() 
+
+markers_converted_percent_dict = dict()
+
+markers_anom_dict = dict() 
+
+markers_anom_percent_dict = dict()
 
 for ws in range(5, 25, 5):
 
     all_markers_dict[ws] = dict()
 
+    all_markers_converted_dict[ws] = dict()
+
+    all_markers_anom_dict[ws] = dict()
+
     markers_dict[ws] = dict()
+
+    markers_percent_dict[ws] = dict() 
+
+    markers_converted_dict[ws] = dict() 
+
+    markers_converted_percent_dict[ws] = dict()
+    
+    markers_anom_dict[ws] = dict() 
+
+    markers_anom_percent_dict[ws] = dict() 
 
     for subdir_name in all_subdirs:
   
         markers_dict[ws][subdir_name] = dict()
+
+        markers_percent_dict[ws][subdir_name] = dict()
+
+        markers_converted_dict[ws][subdir_name] = dict()
+
+        markers_converted_percent_dict[ws][subdir_name] = dict()
+
+        markers_anom_dict[ws][subdir_name] = dict()
+
+        markers_anom_percent_dict[ws][subdir_name] = dict()
             
         if not os.path.isdir(subdir_name) or "Vehicle" not in subdir_name:
+
             continue 
+
         print(subdir_name)
 
         all_files = os.listdir(subdir_name + "/cleaned_csv/") 
@@ -33,92 +116,82 @@ for ws in range(5, 25, 5):
 
             markers_set = set(file_with_ride["marker"])
 
-            markers_dict[ws][subdir_name][short_name] = {mrk: markers_list.count(mrk) / len(markers_list) for mrk in markers_set}
-  
+            markers_converted_list = []
+
+            markers_anom_list = []
+
+            for mrk in markers_list:
+
+                mrk_set = sorted(list(set(str(mrk))))
+
+                mrk_str = ""
+
+                for m in mrk_set:
+
+                    mrk_str += m
+
+                if str(mrk) == "nan":
+
+                    mrk_str = "nan"
+
+                is_anom = "non_anom"
+
+                for l in mrk_str:
+
+                    if l != "e" and l != "d":
+
+                        is_anom = "anom"
+
+                if str(mrk) == "nan":
+
+                    is_anom = "non_anom"
+
+                markers_converted_list.append(mrk_str)
+
+                markers_anom_list.append(is_anom)
+
+            markers_converted_set = set(markers_converted_list)
+
+            markers_anom_set = set(markers_anom_list)
+ 
+            markers_dict[ws][subdir_name][short_name] = {mrk: markers_list.count(mrk) for mrk in markers_set}
+    
+            markers_percent_dict[ws][subdir_name][short_name] = {mrk: markers_list.count(mrk) / len(markers_list) for mrk in markers_set}
+
+            markers_converted_dict[ws][subdir_name][short_name] = {mrk: markers_converted_list.count(mrk) for mrk in markers_converted_set}
+    
+            markers_converted_percent_dict[ws][subdir_name][short_name] = {mrk: markers_converted_list.count(mrk) / len(markers_converted_list) for mrk in markers_converted_set}
+
+            markers_anom_dict[ws][subdir_name][short_name] = {mrk: markers_anom_list.count(mrk) for mrk in markers_anom_set}
+    
+            markers_anom_percent_dict[ws][subdir_name][short_name] = {mrk: markers_anom_list.count(mrk) / len(markers_anom_list) for mrk in markers_anom_set}
+
             for mrk in markers_dict[ws][subdir_name][short_name]:
 
                 if mrk not in all_markers_dict[ws]:
 
                     all_markers_dict[ws][mrk] = 0
 
-                all_markers_dict[ws][mrk] += markers_dict[ws][subdir_name][short_name][mrk]
+                all_markers_dict[ws][mrk] += markers_dict[ws][subdir_name][short_name][mrk] 
 
-            #chr_list = [hex(c)[-1] for c in range(16)]
+            for mrk in markers_converted_dict[ws][subdir_name][short_name]:
 
-            #chrs_of_len = ['']
+                if mrk not in all_markers_converted_dict[ws]:
 
-            #len_reached = 0
+                    all_markers_converted_dict[ws][mrk] = 0
 
-            #for x in range(ws):
+                all_markers_converted_dict[ws][mrk] += markers_converted_dict[ws][subdir_name][short_name][mrk] 
+  
+            for mrk in markers_anom_dict[ws][subdir_name][short_name]:
 
-                #chrs_of_len = [c1 + c2 for c1 in chr_list for c2 in chrs_of_len]
-            
-            #print(len(chrs_of_len))
+                if mrk not in all_markers_anom_dict[ws]:
 
-        break 
-         
-    for mrkr in all_markers_dict[ws]:
+                    all_markers_anom_dict[ws][mrk] = 0
 
-        if all_markers_dict[ws][mrkr] > 10:
- 
-            print(mrkr, all_markers_dict[ws][mrkr])
+                all_markers_anom_dict[ws][mrk] += markers_anom_dict[ws][subdir_name][short_name][mrk] 
 
-    print(len(all_markers_dict[ws]))
+    save_distances(all_markers_dict, markers_percent_dict, "all")
 
-    list_keys = sorted([str(mrk) for mrk in list(all_markers_dict[ws].keys())])
+    save_distances(all_markers_converted_dict, markers_converted_percent_dict, "converted")
 
-    strpr = "vehicle;ride;ws"
-
-    for mrk in list_keys:
-
-        strpr += ";" + mrk 
-
-    strpr += "\n"
-
-    rows_for_dist = []
-
-    names_for_dist = []
-
-    for subdir_name in markers_dict[ws]:
-
-        for short_name in markers_dict[ws][subdir_name]:
-
-            strpr += subdir_name + ";" + short_name + ";" + str(ws)
-
-            names_for_dist.append(subdir_name + "/" + str(ws) + "/" + short_name)
-
-            rows_for_dist.append([])
-
-            for mrk in list_keys:
-
-                cnt = 0
-
-                if mrk in markers_dict[ws][subdir_name][short_name]:
-
-                    cnt = markers_dict[ws][subdir_name][short_name][mrk]
-
-                strpr += ";" + str(cnt)
-
-                rows_for_dist[-1].append(cnt)
-
-            rows_for_dist[-1] = np.array(rows_for_dist[-1])
-
-            strpr += "\n"
-
-    #file_distances = open("marker_distances_" + str(ws) + ".csv", "w")
-    
-    #file_distances.write(strpr)
-
-    #file_distances.close()
-
-    rows_for_dist = np.array(rows_for_dist)
-
-    distances_np = np.linalg.norm(rows_for_dist[:, None] - rows_for_dist, axis = 2)
-
-    print(np.shape(distances_np))
-    sns.heatmap(distances_np) 
-    plt.show()
-
-    for rownum in range(len(distances_np)):
-        sort_distances = sorted([(distances_np[rownum, colnum], names_for_dist[colnum]) for colnum in range(len(distances_np))])
-        print(sort_distances[1:11])
+    save_distances(all_markers_anom_dict, markers_anom_percent_dict, "anom")
