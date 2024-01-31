@@ -53,7 +53,9 @@ for ws in range(5, 25, 5):
 
                 #chrs_of_len = [c1 + c2 for c1 in chr_list for c2 in chrs_of_len]
             
-            #print(len(chrs_of_len)) 
+            #print(len(chrs_of_len))
+
+        break 
          
     for mrkr in all_markers_dict[ws]:
 
@@ -120,5 +122,3 @@ for ws in range(5, 25, 5):
     for rownum in range(len(distances_np)):
         sort_distances = sorted([(distances_np[rownum, colnum], names_for_dist[colnum]) for colnum in range(len(distances_np))])
         print(sort_distances[1:11])
-
-    break
