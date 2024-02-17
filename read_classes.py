@@ -66,132 +66,146 @@ markers_anom_percent_dict = dict()
 
 for ws in range(5, 25, 5):
 
-    all_markers_dict[ws] = dict()
+    for use_step in [1, ws]:
 
-    all_markers_converted_dict[ws] = dict()
+        all_markers_dict[ws] = dict()
 
-    all_markers_anom_dict[ws] = dict()
+        all_markers_converted_dict[ws] = dict()
 
-    markers_dict[ws] = dict()
+        all_markers_anom_dict[ws] = dict()
 
-    markers_percent_dict[ws] = dict() 
+        markers_dict[ws] = dict()
 
-    markers_converted_dict[ws] = dict() 
+        markers_percent_dict[ws] = dict() 
 
-    markers_converted_percent_dict[ws] = dict()
+        markers_converted_dict[ws] = dict() 
+
+        markers_converted_percent_dict[ws] = dict()
+        
+        markers_anom_dict[ws] = dict() 
+
+        markers_anom_percent_dict[ws] = dict() 
+
+        for subdir_name in all_subdirs:
     
-    markers_anom_dict[ws] = dict() 
+            markers_dict[ws][subdir_name] = dict()
 
-    markers_anom_percent_dict[ws] = dict() 
+            markers_percent_dict[ws][subdir_name] = dict()
 
-    for subdir_name in all_subdirs:
-  
-        markers_dict[ws][subdir_name] = dict()
+            markers_converted_dict[ws][subdir_name] = dict()
 
-        markers_percent_dict[ws][subdir_name] = dict()
+            markers_converted_percent_dict[ws][subdir_name] = dict()
 
-        markers_converted_dict[ws][subdir_name] = dict()
+            markers_anom_dict[ws][subdir_name] = dict()
 
-        markers_converted_percent_dict[ws][subdir_name] = dict()
+            markers_anom_percent_dict[ws][subdir_name] = dict()
+                
+            if not os.path.isdir(subdir_name) or "Vehicle" not in subdir_name:
 
-        markers_anom_dict[ws][subdir_name] = dict()
+                continue 
 
-        markers_anom_percent_dict[ws][subdir_name] = dict()
-            
-        if not os.path.isdir(subdir_name) or "Vehicle" not in subdir_name:
+            print(subdir_name)
 
-            continue 
+            all_files = os.listdir(subdir_name + "/cleaned_csv/") 
 
-        print(subdir_name)
+            for some_file in all_files:   
 
-        all_files = os.listdir(subdir_name + "/cleaned_csv/") 
+                file_with_ride = pd.read_csv("markers/" + subdir_name + "/" + str(ws) + "/" + some_file, sep = ";", index_col = False)
+        
+                short_name = some_file.replace(".csv", "".replace("events_", ""))
 
-        for some_file in all_files:   
+                markers_list = []
 
-            file_with_ride = pd.read_csv("markers/" + subdir_name + "/" + str(ws) + "/" + some_file, sep = ";", index_col = False)
-    
-            short_name = some_file.replace(".csv", "".replace("events_", ""))
+                list_all_markers = list(file_with_ride["marker"])
+                  
+                for ix_mrk in range(0, len(list_all_markers), use_step):
 
-            markers_list = list(file_with_ride["marker"])
+                    markers_list.append(list_all_markers[ix_mrk])
 
-            markers_set = set(file_with_ride["marker"])
+                markers_set = set(markers_list)
 
-            markers_converted_list = []
+                markers_converted_list = []
 
-            markers_anom_list = []
+                markers_anom_list = []
 
-            for mrk in markers_list:
+                for mrk in markers_list: 
 
-                mrk_set = sorted(list(set(str(mrk))))
+                    mrk_set = sorted(list(set(str(mrk))))
 
-                mrk_str = ""
+                    mrk_str = ""
 
-                for m in mrk_set:
+                    for m in mrk_set:
 
-                    mrk_str += m
+                        mrk_str += m
 
-                if str(mrk) == "nan":
+                    if str(mrk) == "nan":
 
-                    mrk_str = "nan"
-
-                is_anom = "non_anom"
-
-                for l in mrk_str:
-
-                    if l != "e" and l != "d":
-
-                        is_anom = "anom"
-
-                if str(mrk) == "nan":
+                        mrk_str = "nan"
 
                     is_anom = "non_anom"
 
-                markers_converted_list.append(mrk_str)
+                    for l in mrk_str:
 
-                markers_anom_list.append(is_anom)
+                        if l != "e" and l != "d":
 
-            markers_converted_set = set(markers_converted_list)
+                            is_anom = "anom"
 
-            markers_anom_set = set(markers_anom_list)
- 
-            markers_dict[ws][subdir_name][short_name] = {mrk: markers_list.count(mrk) for mrk in markers_set}
+                    if str(mrk) == "nan":
+
+                        is_anom = "non_anom"
+
+                    markers_converted_list.append(mrk_str)
+
+                    markers_anom_list.append(is_anom)
+
+                markers_converted_set = set(markers_converted_list)
+
+                markers_anom_set = set(markers_anom_list)
     
-            markers_percent_dict[ws][subdir_name][short_name] = {mrk: markers_list.count(mrk) / len(markers_list) for mrk in markers_set}
+                markers_dict[ws][subdir_name][short_name] = {mrk: markers_list.count(mrk) for mrk in markers_set}
+        
+                markers_percent_dict[ws][subdir_name][short_name] = {mrk: markers_list.count(mrk) / len(markers_list) for mrk in markers_set}
 
-            markers_converted_dict[ws][subdir_name][short_name] = {mrk: markers_converted_list.count(mrk) for mrk in markers_converted_set}
+                markers_converted_dict[ws][subdir_name][short_name] = {mrk: markers_converted_list.count(mrk) for mrk in markers_converted_set}
+        
+                markers_converted_percent_dict[ws][subdir_name][short_name] = {mrk: markers_converted_list.count(mrk) / len(markers_converted_list) for mrk in markers_converted_set}
+
+                markers_anom_dict[ws][subdir_name][short_name] = {mrk: markers_anom_list.count(mrk) for mrk in markers_anom_set}
+        
+                markers_anom_percent_dict[ws][subdir_name][short_name] = {mrk: markers_anom_list.count(mrk) / len(markers_anom_list) for mrk in markers_anom_set}
+
+                for mrk in markers_dict[ws][subdir_name][short_name]:
+
+                    if mrk not in all_markers_dict[ws]:
+
+                        all_markers_dict[ws][mrk] = 0
+
+                    all_markers_dict[ws][mrk] += markers_dict[ws][subdir_name][short_name][mrk] 
+
+                for mrk in markers_converted_dict[ws][subdir_name][short_name]:
+
+                    if mrk not in all_markers_converted_dict[ws]:
+
+                        all_markers_converted_dict[ws][mrk] = 0
+
+                    all_markers_converted_dict[ws][mrk] += markers_converted_dict[ws][subdir_name][short_name][mrk] 
     
-            markers_converted_percent_dict[ws][subdir_name][short_name] = {mrk: markers_converted_list.count(mrk) / len(markers_converted_list) for mrk in markers_converted_set}
+                for mrk in markers_anom_dict[ws][subdir_name][short_name]:
 
-            markers_anom_dict[ws][subdir_name][short_name] = {mrk: markers_anom_list.count(mrk) for mrk in markers_anom_set}
-    
-            markers_anom_percent_dict[ws][subdir_name][short_name] = {mrk: markers_anom_list.count(mrk) / len(markers_anom_list) for mrk in markers_anom_set}
+                    if mrk not in all_markers_anom_dict[ws]:
 
-            for mrk in markers_dict[ws][subdir_name][short_name]:
+                        all_markers_anom_dict[ws][mrk] = 0
 
-                if mrk not in all_markers_dict[ws]:
+                    all_markers_anom_dict[ws][mrk] += markers_anom_dict[ws][subdir_name][short_name][mrk] 
 
-                    all_markers_dict[ws][mrk] = 0
+        save_distances(all_markers_dict, markers_percent_dict, "all_percent_" + str(use_step))
 
-                all_markers_dict[ws][mrk] += markers_dict[ws][subdir_name][short_name][mrk] 
+        save_distances(all_markers_converted_dict, markers_converted_percent_dict, "converted_percent_" + str(use_step))
 
-            for mrk in markers_converted_dict[ws][subdir_name][short_name]:
+        save_distances(all_markers_anom_dict, markers_anom_percent_dict, "anom_percent_" + str(use_step))
 
-                if mrk not in all_markers_converted_dict[ws]:
+        save_distances(all_markers_dict, markers_dict, "all_count_" + str(use_step))
 
-                    all_markers_converted_dict[ws][mrk] = 0
+        save_distances(all_markers_converted_dict, markers_converted_dict, "converted_count_" + str(use_step))
 
-                all_markers_converted_dict[ws][mrk] += markers_converted_dict[ws][subdir_name][short_name][mrk] 
-  
-            for mrk in markers_anom_dict[ws][subdir_name][short_name]:
-
-                if mrk not in all_markers_anom_dict[ws]:
-
-                    all_markers_anom_dict[ws][mrk] = 0
-
-                all_markers_anom_dict[ws][mrk] += markers_anom_dict[ws][subdir_name][short_name][mrk] 
-
-    save_distances(all_markers_dict, markers_percent_dict, "all")
-
-    save_distances(all_markers_converted_dict, markers_converted_percent_dict, "converted")
-
-    save_distances(all_markers_anom_dict, markers_anom_percent_dict, "anom")
+        save_distances(all_markers_anom_dict, markers_anom_dict, "anom_count_" + str(use_step))

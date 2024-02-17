@@ -9,6 +9,10 @@ for subdir_name in os.listdir("marker_count"):
             
             continue
 
+        if "_percent_1_5" not in csv_file:
+            
+            continue 
+
         file_csv = pd.read_csv("marker_count/" + subdir_name + "/" + csv_file, sep = ";", index_col = False)
  
         colname_sum = dict()
@@ -62,6 +66,7 @@ for subdir_name in os.listdir("marker_count"):
         sort_distances = sorted([(distances_np[ix, colnum], names_for_dist[colnum]) for colnum in range(len(distances_np))])
 
         print(sort_distances[1:11])
+        print(sort_distances[1], sort_distances[-1])
 
         #for rownum in range(len(distances_np)):
 

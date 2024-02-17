@@ -33,8 +33,7 @@ for subdir_name in all_subdirs:
         longitudes = list(file_with_ride["fields_longitude"])
         latitudes = list(file_with_ride["fields_latitude"])  
         times = list(file_with_ride["time"])
-        times_processed = [process_time(time_new) for time_new in times] 
-        times_delays = [times_processed[time_index + 1] - times_processed[time_index] for time_index in range(len(times_processed) - 1)] 
+        times_processed = [process_time(time_new) for time_new in times]  
  
         order_of_mrkrs = dict()
 
