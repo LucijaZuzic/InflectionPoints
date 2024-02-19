@@ -52,7 +52,7 @@ for subdir_name in all_subdirs:
         else: 
             cheight = yrange / xrange * cwidth
          
-        plt.figure(figsize = (cwidth, cheight), dpi = 80) 
+        plt.figure(figsize = (cwidth, cheight), dpi = 300) 
         plt.axis('off') 
         plt.plot(longitudes, latitudes, c = "k")
         plt.savefig(new_file, bbox_inches = "tight")
