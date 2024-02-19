@@ -5,3 +5,4 @@ marker_count/*
 *.json
 cleaned_json/*
 cleaned_json_no_data/*
+cleaned_png/*
