@@ -8,11 +8,7 @@ for subdir_name in os.listdir("marker_count"):
 
         if ".csv" not in csv_file:
             
-            continue 
-
-        if "_all_percent_1_5" not in csv_file:
-            
-            continue 
+            continue  
 
         file_csv = pd.read_csv("marker_count/" + subdir_name + "/" + csv_file, sep = ";", index_col = False)
  
