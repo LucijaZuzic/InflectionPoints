@@ -1,15 +1,16 @@
 from utilities import *
-import seaborn as sns
-  
+
+import json
+ 
 for subdir_name in os.listdir("marker_count"):
     
     for csv_file in os.listdir("marker_count/" + subdir_name):
 
         if ".csv" not in csv_file:
             
-            continue
+            continue 
 
-        if "_percent_1_5" not in csv_file:
+        if "_all_percent_1_5" not in csv_file:
             
             continue 
 
@@ -17,7 +18,7 @@ for subdir_name in os.listdir("marker_count"):
  
         colname_sum = dict()
 
-        for colname in file_csv.columns[4:]:
+        for colname in file_csv.columns[3:]:
 
             colname_sum[colname] = sum(file_csv[colname])
 
@@ -52,22 +53,35 @@ for subdir_name in os.listdir("marker_count"):
         rows_for_dist = np.array(rows_for_dist)
 
         distances_np = np.linalg.norm(rows_for_dist[:, None] - rows_for_dist, axis = 2)
-
-        save_object("marker_count/" + subdir_name + "/" + csv_file.replace(".csv", ".npy"), distances_np)
-  
-        #sns.heatmap(distances_np) 
-
-        #plt.show()
-
-        name_find = "Vehicle_10/events_8377353"
-
-        ix = names_for_dist.index(name_find)
     
-        sort_distances = sorted([(distances_np[ix, colnum], names_for_dist[colnum]) for colnum in range(len(distances_np))])
+        usable_indexes_all = {"compare_to": []}
 
-        print(sort_distances[1:11])
-        print(sort_distances[1], sort_distances[-1])
+        for ix in range(len(distances_np)):
+ 
+            sort_distances = sorted([(distances_np[ix, colnum], names_for_dist[colnum]) for colnum in range(len(distances_np))]) 
 
-        #for rownum in range(len(distances_np)):
+            vehicle_name_started =names_for_dist[ix].split("/")
+            
+            vehicle_started = int(vehicle_name_started[0].split("_")[1])
 
-            #sort_distances = sorted([(distances_np[rownum, colnum], names_for_dist[colnum]) for colnum in range(len(distances_np))])
+            ride_started = int(vehicle_name_started[1].split("_")[1])
+
+            usable_indexes_all["compare_to"].append({"index": ix, "vehicle": vehicle_started, "ride": ride_started, "similar": []})
+
+            for ix_use in range(1, len(sort_distances), int(np.floor(len(sort_distances) // 19))):
+
+                vehicle_name = sort_distances[ix_use][1].split("/")
+
+                vehicle_use = int(vehicle_name[0].split("_")[1])
+
+                ride_use = int(vehicle_name[1].split("_")[1])
+ 
+                usable_indexes_all["compare_to"][-1]["similar"].append({"order": ix_use, "compare_vehicle": vehicle_use, "compare_ride": ride_use})
+                
+        print(usable_indexes_all)  
+
+        if not os.path.isdir("most_similar/" + subdir_name):
+            os.makedirs("most_similar/" + subdir_name)
+
+        with open("most_similar/" + subdir_name + "/" + csv_file.replace("csv", "json"), "w") as outfile: 
+            json.dump(usable_indexes_all, outfile)
