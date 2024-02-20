@@ -1,7 +1,6 @@
 __pycache__/*
 *.pyc
 Vehicle*/*
-marker_count/*/*_20*
 *.json
 cleaned_json/*
 cleaned_json_no_data/*
