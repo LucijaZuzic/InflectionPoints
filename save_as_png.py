@@ -51,6 +51,6 @@ for subdir_name in all_subdirs:
         plt.axis('off') 
         plt.xlim(min(longitudes), min(longitudes) + max(xrange, yrange))
         plt.ylim(min(latitudes), min(latitudes) + max(xrange, yrange))
-        plt.plot(longitudes, latitudes, c = "k")
+        plt.plot(longitudes, latitudes, c = "k", linewidth=10)
         plt.savefig(new_file, bbox_inches = "tight")
         plt.close() 
