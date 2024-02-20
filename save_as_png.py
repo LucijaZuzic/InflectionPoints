@@ -51,9 +51,16 @@ for subdir_name in all_subdirs:
             cwidth = xrange / yrange * cheight
         else: 
             cheight = yrange / xrange * cwidth
-         
-        plt.figure(figsize = (cwidth, cheight), dpi = 300) 
-        plt.axis('off') 
-        plt.plot(longitudes, latitudes, c = "k")
-        plt.savefig(new_file, bbox_inches = "tight")
-        plt.close()
+
+        if cwidth >= cheight: 
+            plt.figure(figsize = (cwidth, cheight), dpi = 300) 
+            plt.axis('off') 
+            plt.plot(longitudes, latitudes, c = "k")
+            plt.savefig(new_file, bbox_inches = "tight")
+            plt.close()
+        else:
+            plt.figure(figsize = (cheight, cwidth), dpi = 300) 
+            plt.axis('off') 
+            plt.plot(latitudes, longitudes, c = "k")
+            plt.savefig(new_file, bbox_inches = "tight")
+            plt.close()
