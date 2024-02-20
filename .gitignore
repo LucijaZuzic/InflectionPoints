@@ -1,6 +1,5 @@
 __pycache__/*
 *.pyc
 Vehicle*/* 
-cleaned_json/*
-cleaned_json_no_data/*
+cleaned_json/* 
 cleaned_png/*
