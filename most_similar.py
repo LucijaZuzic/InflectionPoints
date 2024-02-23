@@ -56,7 +56,7 @@ for subdir_name in os.listdir("marker_count"):
  
             sort_distances = sorted([(distances_np[ix, colnum], names_for_dist[colnum]) for colnum in range(len(distances_np))]) 
 
-            vehicle_name_started =names_for_dist[ix].split("/")
+            vehicle_name_started = names_for_dist[ix].split("/")
             
             vehicle_started = int(vehicle_name_started[0].split("_")[1])
 
