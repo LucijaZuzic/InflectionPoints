@@ -21,7 +21,10 @@ def draw_dx(o, x0, y0, dx1, dx2, dy1, dy2):
     plt.rcParams["mathtext.fontset"] = "dejavuserif"
     plt.axis("equal") 
     plt.axis("off") 
-    plt.title(str(hex(o)).replace("0x", "").capitalize())
+    binstr = str(bin(o).replace("0b", ""))
+    while len(binstr) < 4:
+        binstr = "0" + binstr
+    plt.title(str(hex(o)).replace("0x", "").capitalize() + " (" + binstr + ")")
     minx = min(min(x0, x1), x2) - 0.2
     miny = min(min(y0, y1), y2) - 0.2
     maxx = max(max(x0, x1), x2) + 0.2
