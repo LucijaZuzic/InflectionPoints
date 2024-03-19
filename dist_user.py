@@ -103,7 +103,7 @@ def process_ws(ws):
             ord_user[user_id][merge_reference] -= np.sum(list(range(5)))
         print(np.sum(list(ord_user[user_id].values())), len(ord_user[user_id]), np.sum(list(ord_user[user_id].values())) / len(ord_user[user_id]), np.sum(list(range(15, 20))), np.sum(list(range(5))), np.sum(list(range(15, 20))) - np.sum(list(range(5))), np.sum(list(ord_user[user_id].values())) / len(ord_user[user_id]) / (np.sum(list(range(15, 20))) - np.sum(list(range(5)))) * 100)
         print(np.sum(list(fq_user[user_id].values())), len(fq_user[user_id]), np.sum(list(fq_user[user_id].values())) / len(fq_user[user_id]), np.sum(list(fq_user[user_id].values())) / len(fq_user[user_id]) / 5 * 100) 
-        for ix in range(0, 1):
+        for ix in range(0, 5):
             print(ix, ix_user[user_id][ix], len(ord_user[user_id]), ix_user[user_id][ix] / len(ord_user[user_id]) * 100)
         print(np.sum(list(euclidean_user[user_id].values())), len(euclidean_user[user_id]), np.sum(list(euclidean_user[user_id].values())) / len(euclidean_user[user_id]))
         print(np.sum(list(euclidean_percent_user[user_id].values())), len(euclidean_percent_user[user_id]), np.sum(list(euclidean_percent_user[user_id].values())) / len(euclidean_percent_user[user_id]))
@@ -134,7 +134,7 @@ def process_ws(ws):
     
     print(np.sum(list(ord_all.values())), len(ord_all), np.sum(list(ord_all.values())) / len(ord_all), np.sum(list(range(15, 20))), np.sum(list(range(5))), np.sum(list(range(15, 20))) - np.sum(list(range(5))), np.sum(list(ord_all.values())) / len(ord_all) / (np.sum(list(range(15, 20))) - np.sum(list(range(5)))) * 100)
     print(np.sum(list(fq_all.values())), len(fq_all), np.sum(list(fq_all.values())) / len(fq_all), np.sum(list(fq_all.values())) / len(fq_all) / 5 * 100) 
-    for ix in range(0, 1):
+    for ix in range(0, 5):
         print(ix, ix_all[ix], len(ord_all), ix_all[ix] / len(ord_all) * 100)
     print(np.sum(list(euclidean_all.values())), len(euclidean_all), np.sum(list(euclidean_all.values())) / len(euclidean_all))
     print(np.sum(list(euclidean_percent_all.values())), len(euclidean_percent_all), np.sum(list(euclidean_percent_all.values())) / len(euclidean_percent_all))

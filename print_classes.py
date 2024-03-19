@@ -1,5 +1,6 @@
 from utilities import *
-
+used_dicts_size = dict()
+set_used_all = set()
 for subdir_name in os.listdir("marker_count"):
     
     for csv_file in os.listdir("marker_count/" + subdir_name):
@@ -49,15 +50,19 @@ for subdir_name in os.listdir("marker_count"):
                 suma += colname_sum[val]
 
         print(csv_file, len(file_csv.columns[3:]), suma, sumsums, suma / sumsums) 
-
+        used_dicts_size[csv_file] = set_used
+        if len(set_used_all) == 0:
+            set_used_all = set_used
+        else:
+            set_used_all = set_used_all.intersection(set_used)
         used_dict = []
         for colname in set_used:
             used_dict.append((colname_sum[colname] / sumsums, colname_sum[colname], colname))
         used_dict = sorted(used_dict)
         for val in used_dict:
             if val[0] > 10 ** -2:
-                print(val)
-
+                print(val[2], "&", np.round(val[0] * 100, 2), "\\\\ \\hline")
+        
         minisum = (1000000, 1, 1, 1)
         maxisum = (-1000000, 1, 1, 1)
         for ix in range(len(file_csv)):
@@ -72,3 +77,5 @@ for subdir_name in os.listdir("marker_count"):
             if totalsum != 0 and somesum / totalsum < minisum[0]:
                 minisum = (somesum / totalsum, somesum, totalsum, ix)
         print(minisum, maxisum)
+
+print(len(set_used_all))
