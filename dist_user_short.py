@@ -20,7 +20,11 @@ def process_ws(ws):
             dict_actual[merge_reference][other_reference] = (ord_ref, dist_ref)
     
     usable_ref = set()
+    banned = ["oldsz6oBFprLHMCOZ8RrY5qC4NqyWN2", "uYtOqsFbKhhEjc3zFe1AlHDaGEz2", "wzn4aVKA1Ja8D7ifTq1NzOCaWex1", "9Y00mt5TXdb2jZnDHANZQJjFzK43"] 
     for user_id_file in os.listdir("marked/" + str(ws)):
+        user_id = user_id_file.replace("_" + str(ws) + ".csv", "")
+        if user_id in banned: 
+            continue 
         file_user_id = pd.read_csv("marked/" + str(ws) + "/" + user_id_file, sep = ";", index_col = False)
         for ix in range(len(file_user_id["vehicle"])):
             merge_reference = str(file_user_id["vehicle"][ix]) + "_" + str(file_user_id["ride"][ix])
@@ -73,6 +77,9 @@ def process_ws(ws):
     selected_actual = dict() 
     
     for user_id_file in os.listdir("marked/" + str(ws)):
+        user_id = user_id_file.replace("_" + str(ws) + ".csv", "")
+        if user_id in banned: 
+            continue  
         file_user_id = pd.read_csv("marked/" + str(ws) + "/" + user_id_file, sep = ";", index_col = False)
         for ix in range(len(file_user_id["vehicle"])): 
             merge_reference = str(file_user_id["vehicle"][ix]) + "_" + str(file_user_id["ride"][ix])
@@ -108,7 +115,6 @@ def process_ws(ws):
     binary_flat_predicted_user = dict()
     selected_flat_predicted_user = dict()
       
-    banned = ["oldsz6oBFprLHMCOZ8RrY5qC4NqyWN2", "uYtOqsFbKhhEjc3zFe1AlHDaGEz2", "wzn4aVKA1Ja8D7ifTq1NzOCaWex1", "9Y00mt5TXdb2jZnDHANZQJjFzK43"] 
     for user_id_file in os.listdir("marked/" + str(ws)):
         user_id = user_id_file.replace("_" + str(ws) + ".csv", "")
         if user_id in banned: 
@@ -161,22 +167,76 @@ def process_ws(ws):
                 print("ERROR", user_id, merge_reference)
 
             #print(user_id, merge_reference, mean_absolute_error(binary_actual[merge_reference], binary_user[user_id][merge_reference]), r2_score(binary_actual[merge_reference], binary_user[user_id][merge_reference]) * 100, math.sqrt(mean_squared_error(binary_actual[merge_reference], binary_user[user_id][merge_reference])) * 100)
-
             #print(user_id, merge_reference, mean_absolute_error(euclidean_actual[merge_reference], euclidean_user[user_id][merge_reference]), r2_score(euclidean_actual[merge_reference], euclidean_user[user_id][merge_reference]) * 100 ,math.sqrt(mean_squared_error(euclidean_actual[merge_reference], euclidean_user[user_id][merge_reference])) / euclidean_max_to_min_usable * 100)
-
             #print(user_id, merge_reference, mean_absolute_error(selected_actual[merge_reference], selected_user[user_id][merge_reference]), r2_score(selected_actual[merge_reference], selected_user[user_id][merge_reference]) * 100, math.sqrt(mean_squared_error(selected_actual[merge_reference], selected_user[user_id][merge_reference])) / 19 * 100)
 
         #print(user_id, mean_absolute_error(binary_flat_actual_user[user_id], binary_flat_predicted_user[user_id]), r2_score(binary_flat_actual_user[user_id], binary_flat_predicted_user[user_id]) * 100, math.sqrt(mean_squared_error(binary_flat_actual_user[user_id], binary_flat_predicted_user[user_id])) * 100)
-
         #print(user_id, mean_absolute_error(euclidean_flat_actual_user[user_id], euclidean_flat_predicted_user[user_id]), r2_score(euclidean_flat_actual_user[user_id], euclidean_flat_predicted_user[user_id]) * 100, math.sqrt(mean_squared_error(euclidean_flat_actual_user[user_id], euclidean_flat_predicted_user[user_id])) / euclidean_max_to_min_usable * 100)
-        
         #print(user_id, mean_absolute_error(selected_flat_actual_user[user_id], selected_flat_predicted_user[user_id]), r2_score(selected_flat_actual_user[user_id], selected_flat_predicted_user[user_id]) * 100, math.sqrt(mean_squared_error(selected_flat_actual_user[user_id], selected_flat_predicted_user[user_id])) / 19 * 100)
     
     print(mean_absolute_error(binary_flat_actual_all, binary_flat_predicted_all), r2_score(binary_flat_actual_all, binary_flat_predicted_all) * 100, math.sqrt(mean_squared_error(binary_flat_actual_all, binary_flat_predicted_all)) * 100)
-
     print(mean_absolute_error(euclidean_flat_actual_all, euclidean_flat_predicted_all), r2_score(euclidean_flat_actual_all, euclidean_flat_predicted_all) * 100, math.sqrt(mean_squared_error(euclidean_flat_actual_all, euclidean_flat_predicted_all)) / euclidean_max_to_min_usable * 100)
-
     print(mean_absolute_error(selected_flat_actual_all, selected_flat_predicted_all), r2_score(selected_flat_actual_all, selected_flat_predicted_all) * 100, math.sqrt(mean_squared_error(selected_flat_actual_all, selected_flat_predicted_all)) / 19 * 100)
+
+    euclidean_flat_users1 = []
+    binary_flat_users1 = []
+    selected_flat_users1 = []
+
+    euclidean_flat_users2 = []
+    binary_flat_users2 = []
+    selected_flat_users2 = []
+
+    euclidean_flat_users1_users2 = dict()
+    binary_flat_users1_users2 = dict()
+    selected_flat_users1_users2 = dict()
+
+    euclidean_flat_users2_users1 = dict()
+    binary_flat_users2_users1 = dict()
+    selected_flat_users2_users1 = dict()
+ 
+    for user_id_file1 in os.listdir("marked/" + str(ws)):
+        user_id1 = user_id_file1.replace("_" + str(ws) + ".csv", "")
+        if user_id1 in banned: 
+            continue  
+        euclidean_flat_users1_users2[user_id1] = []
+        binary_flat_users1_users2[user_id1] = []
+        selected_flat_users1_users2[user_id1] = []
+        euclidean_flat_users2_users1[user_id1] = []
+        binary_flat_users2_users1[user_id1] = []
+        selected_flat_users2_users1[user_id1] = []
+        for user_id_file2 in os.listdir("marked/" + str(ws)):
+            user_id2 = user_id_file2.replace("_" + str(ws) + ".csv", "")
+            if user_id2 in banned: 
+                continue 
+            if user_id2 == user_id1: 
+                continue
+            for s_ix in range(len(selected_flat_predicted_user[user_id1])):
+                selected_flat_users1_users2[user_id1].append(selected_flat_predicted_user[user_id1][s_ix]) 
+                selected_flat_users2_users1[user_id1].append(selected_flat_predicted_user[user_id2][s_ix]) 
+                selected_flat_users1.append(selected_flat_predicted_user[user_id1][s_ix]) 
+                selected_flat_users2.append(selected_flat_predicted_user[user_id2][s_ix]) 
+            for e_ix in range(len(euclidean_flat_predicted_user[user_id1])):  
+                euclidean_flat_users1_users2[user_id1].append(euclidean_flat_predicted_user[user_id1][e_ix]) 
+                euclidean_flat_users2_users1[user_id1].append(euclidean_flat_predicted_user[user_id2][e_ix]) 
+                euclidean_flat_users1.append(euclidean_flat_predicted_user[user_id1][e_ix]) 
+                euclidean_flat_users2.append(euclidean_flat_predicted_user[user_id2][e_ix]) 
+            for b_ix in range(len(binary_flat_predicted_user[user_id1])):  
+                binary_flat_users1_users2[user_id1].append(binary_flat_predicted_user[user_id1][b_ix]) 
+                binary_flat_users2_users1[user_id1].append(binary_flat_predicted_user[user_id2][b_ix]) 
+                binary_flat_users1.append(binary_flat_predicted_user[user_id1][b_ix]) 
+                binary_flat_users2.append(binary_flat_predicted_user[user_id2][b_ix]) 
+            
+            #print(user_id1, user_id2, mean_absolute_error(binary_flat_predicted_user[user_id1], binary_flat_predicted_user[user_id2]), r2_score(binary_flat_predicted_user[user_id1], binary_flat_predicted_user[user_id2]) * 100, math.sqrt(mean_squared_error(binary_flat_predicted_user[user_id1], binary_flat_predicted_user[user_id2])) * 100)
+            #print(user_id1, user_id2, mean_absolute_error(euclidean_flat_predicted_user[user_id1], euclidean_flat_predicted_user[user_id2]), r2_score(euclidean_flat_predicted_user[user_id1], euclidean_flat_predicted_user[user_id2]) * 100, math.sqrt(mean_squared_error(euclidean_flat_predicted_user[user_id1], euclidean_flat_predicted_user[user_id2])) / euclidean_max_to_min_usable * 100)
+            #print(user_id1, user_id2, mean_absolute_error(selected_flat_predicted_user[user_id1], selected_flat_predicted_user[user_id2]), r2_score(selected_flat_predicted_user[user_id1], selected_flat_predicted_user[user_id2]) * 100, math.sqrt(mean_squared_error(selected_flat_predicted_user[user_id1], selected_flat_predicted_user[user_id2])) / 19 * 100)
+
+        #print(user_id1, mean_absolute_error(binary_flat_users1_users2[user_id1], binary_flat_users2_users1[user_id1]), r2_score(binary_flat_users1_users2[user_id1], binary_flat_users2_users1[user_id1]) * 100, math.sqrt(mean_squared_error(binary_flat_users1_users2[user_id1], binary_flat_users2_users1[user_id1])) * 100)
+        #print(user_id1, mean_absolute_error(euclidean_flat_users1_users2[user_id1], euclidean_flat_users2_users1[user_id1]), r2_score(euclidean_flat_users1_users2[user_id1], euclidean_flat_users2_users1[user_id1]) * 100, math.sqrt(mean_squared_error(euclidean_flat_users1_users2[user_id1], euclidean_flat_users2_users1[user_id1])) / euclidean_max_to_min_usable * 100)
+        #print(user_id1, mean_absolute_error(selected_flat_users1_users2[user_id1], selected_flat_users2_users1[user_id1]), r2_score(selected_flat_users1_users2[user_id1], selected_flat_users2_users1[user_id1]) * 100, math.sqrt(mean_squared_error(selected_flat_users1_users2[user_id1], selected_flat_users2_users1[user_id1])) / 19 * 100)
+
+    print(mean_absolute_error(binary_flat_users1, binary_flat_users2), r2_score(binary_flat_users1, binary_flat_users2) * 100, math.sqrt(mean_squared_error(binary_flat_users1, binary_flat_users2)) * 100)
+    print(mean_absolute_error(euclidean_flat_users1, euclidean_flat_users2), r2_score(euclidean_flat_users1, euclidean_flat_users2) * 100, math.sqrt(mean_squared_error(euclidean_flat_users1, euclidean_flat_users2)) / euclidean_max_to_min_usable * 100)
+    print(mean_absolute_error(selected_flat_users1, selected_flat_users2), r2_score(selected_flat_users1, selected_flat_users2) * 100, math.sqrt(mean_squared_error(selected_flat_users1, selected_flat_users2)) / 19 * 100)
 
 process_ws(10)
 process_ws(20)

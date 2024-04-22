@@ -19,7 +19,11 @@ def process_ws(ws):
             dict_actual[merge_reference][other_reference] = (ord_ref, dist_ref)
 
     usable_ref = set()
+    banned = ["oldsz6oBFprLHMCOZ8RrY5qC4NqyWN2", "uYtOqsFbKhhEjc3zFe1AlHDaGEz2", "wzn4aVKA1Ja8D7ifTq1NzOCaWex1", "9Y00mt5TXdb2jZnDHANZQJjFzK43"] 
     for user_id_file in os.listdir("marked/" + str(ws)):
+        user_id = user_id_file.replace("_" + str(ws) + ".csv", "")
+        if user_id in banned: 
+            continue 
         file_user_id = pd.read_csv("marked/" + str(ws) + "/" + user_id_file, sep = ";", index_col = False)
         for ix in range(len(file_user_id["vehicle"])):
             merge_reference = str(file_user_id["vehicle"][ix]) + "_" + str(file_user_id["ride"][ix])
@@ -74,7 +78,6 @@ def process_ws(ws):
     ix_user = dict()
     fq_user = dict()
 
-    banned = ["oldsz6oBFprLHMCOZ8RrY5qC4NqyWN2", "uYtOqsFbKhhEjc3zFe1AlHDaGEz2", "wzn4aVKA1Ja8D7ifTq1NzOCaWex1", "9Y00mt5TXdb2jZnDHANZQJjFzK43"] 
     for user_id_file in os.listdir("marked/" + str(ws)):
         user_id = user_id_file.replace("_" + str(ws) + ".csv", "")
         if user_id in banned: 
