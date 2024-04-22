@@ -74,8 +74,11 @@ def process_ws(ws):
     ix_user = dict()
     fq_user = dict()
 
+    banned = ["0y9LYnVxxIf224ulpnxkyoAMvUE3", "uYtOqsFbKhhEjc3zFe1AlHDaGEz2", "wzn4aVKA1Ja8D7ifTq1NzOCaWex1"] 
     for user_id_file in os.listdir("marked/" + str(ws)):
         user_id = user_id_file.replace("_" + str(ws) + ".csv", "")
+        if user_id in banned: 
+            continue 
         dict_user[user_id] = dict()
         euclidean_user[user_id] = dict()
         euclidean_percent_user[user_id] = dict()
@@ -101,18 +104,18 @@ def process_ws(ws):
             euclidean_user[user_id][merge_reference] -= euclidean_min[merge_reference]
             euclidean_percent_user[user_id][merge_reference] = euclidean_user[user_id][merge_reference] / (euclidean_max[merge_reference] - euclidean_min[merge_reference]) * 100
             ord_user[user_id][merge_reference] -= np.sum(list(range(5)))
-        print(np.sum(list(ord_user[user_id].values())), len(ord_user[user_id]), np.sum(list(ord_user[user_id].values())) / len(ord_user[user_id]), np.sum(list(range(15, 20))), np.sum(list(range(5))), np.sum(list(range(15, 20))) - np.sum(list(range(5))), np.sum(list(ord_user[user_id].values())) / len(ord_user[user_id]) / (np.sum(list(range(15, 20))) - np.sum(list(range(5)))) * 100)
-        print(np.sum(list(fq_user[user_id].values())), len(fq_user[user_id]), np.sum(list(fq_user[user_id].values())) / len(fq_user[user_id]), np.sum(list(fq_user[user_id].values())) / len(fq_user[user_id]) / 5 * 100) 
-        for ix in range(0, 5):
-            print(ix, ix_user[user_id][ix], len(ord_user[user_id]), ix_user[user_id][ix] / len(ord_user[user_id]) * 100)
-        print(np.sum(list(euclidean_user[user_id].values())), len(euclidean_user[user_id]), np.sum(list(euclidean_user[user_id].values())) / len(euclidean_user[user_id]))
-        print(np.sum(list(euclidean_percent_user[user_id].values())), len(euclidean_percent_user[user_id]), np.sum(list(euclidean_percent_user[user_id].values())) / len(euclidean_percent_user[user_id]))
-        print(np.sum(list(euclidean_user[user_id].values())) / len(euclidean_user[user_id]), np.average(usable_euclidean), np.sum(list(euclidean_user[user_id].values())) / len(euclidean_user[user_id]) / np.average(usable_euclidean) * 100)
-        print(np.sum(list(euclidean_user[user_id].values())) / len(euclidean_user[user_id]), np.quantile(usable_euclidean, 0.5), np.sum(list(euclidean_user[user_id].values())) / len(euclidean_user[user_id]) / np.quantile(usable_euclidean, 0.5) * 100)
-        print(np.sum(list(euclidean_user[user_id].values())) / len(euclidean_user[user_id]), np.max(usable_euclidean), np.sum(list(euclidean_user[user_id].values())) / len(euclidean_user[user_id]) / np.max(usable_euclidean) * 100)
-        print(np.sum(list(euclidean_user[user_id].values())) / len(euclidean_user[user_id]), np.min(usable_euclidean), np.sum(list(euclidean_user[user_id].values())) / len(euclidean_user[user_id]) / np.min(usable_euclidean) * 100)
-        print(euclidean_min_max_usable, euclidean_max_min_usable, euclidean_min_to_max_usable, np.sum(list(euclidean_user[user_id].values())) / len(euclidean_user[user_id]), euclidean_min_to_max_usable, np.sum(list(euclidean_user[user_id].values())) / len(euclidean_user[user_id]) / euclidean_min_to_max_usable * 100)
-        print(euclidean_max_max_usable, euclidean_min_min_usable, euclidean_max_to_min_usable, np.sum(list(euclidean_user[user_id].values())) / len(euclidean_user[user_id]), euclidean_max_to_min_usable, np.sum(list(euclidean_user[user_id].values())) / len(euclidean_user[user_id]) / euclidean_max_to_min_usable * 100)
+        #print(np.sum(list(ord_user[user_id].values())), len(ord_user[user_id]), np.sum(list(ord_user[user_id].values())) / len(ord_user[user_id]), np.sum(list(range(15, 20))), np.sum(list(range(5))), np.sum(list(range(15, 20))) - np.sum(list(range(5))), np.sum(list(ord_user[user_id].values())) / len(ord_user[user_id]) / (np.sum(list(range(15, 20))) - np.sum(list(range(5)))) * 100)
+        #print(np.sum(list(fq_user[user_id].values())), len(fq_user[user_id]), np.sum(list(fq_user[user_id].values())) / len(fq_user[user_id]), np.sum(list(fq_user[user_id].values())) / len(fq_user[user_id]) / 5 * 100) 
+        #for ix in range(0, 5):
+            #print(ix, ix_user[user_id][ix], len(ord_user[user_id]), ix_user[user_id][ix] / len(ord_user[user_id]) * 100)
+        #print(np.sum(list(euclidean_user[user_id].values())), len(euclidean_user[user_id]), np.sum(list(euclidean_user[user_id].values())) / len(euclidean_user[user_id]))
+        #print(np.sum(list(euclidean_percent_user[user_id].values())), len(euclidean_percent_user[user_id]), np.sum(list(euclidean_percent_user[user_id].values())) / len(euclidean_percent_user[user_id]))
+        #print(np.sum(list(euclidean_user[user_id].values())) / len(euclidean_user[user_id]), np.average(usable_euclidean), np.sum(list(euclidean_user[user_id].values())) / len(euclidean_user[user_id]) / np.average(usable_euclidean) * 100)
+        #print(np.sum(list(euclidean_user[user_id].values())) / len(euclidean_user[user_id]), np.quantile(usable_euclidean, 0.5), np.sum(list(euclidean_user[user_id].values())) / len(euclidean_user[user_id]) / np.quantile(usable_euclidean, 0.5) * 100)
+        #print(np.sum(list(euclidean_user[user_id].values())) / len(euclidean_user[user_id]), np.max(usable_euclidean), np.sum(list(euclidean_user[user_id].values())) / len(euclidean_user[user_id]) / np.max(usable_euclidean) * 100)
+        #print(np.sum(list(euclidean_user[user_id].values())) / len(euclidean_user[user_id]), np.min(usable_euclidean), np.sum(list(euclidean_user[user_id].values())) / len(euclidean_user[user_id]) / np.min(usable_euclidean) * 100)
+        #print(euclidean_min_max_usable, euclidean_max_min_usable, euclidean_min_to_max_usable, np.sum(list(euclidean_user[user_id].values())) / len(euclidean_user[user_id]), euclidean_min_to_max_usable, np.sum(list(euclidean_user[user_id].values())) / len(euclidean_user[user_id]) / euclidean_min_to_max_usable * 100)
+        #print(euclidean_max_max_usable, euclidean_min_min_usable, euclidean_max_to_min_usable, np.sum(list(euclidean_user[user_id].values())) / len(euclidean_user[user_id]), euclidean_max_to_min_usable, np.sum(list(euclidean_user[user_id].values())) / len(euclidean_user[user_id]) / euclidean_max_to_min_usable * 100)
   
     dict_all = dict()
     euclidean_all = dict()
