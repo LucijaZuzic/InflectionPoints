@@ -108,7 +108,7 @@ def process_ws(ws):
     binary_flat_predicted_user = dict()
     selected_flat_predicted_user = dict()
       
-    banned = ["0y9LYnVxxIf224ulpnxkyoAMvUE3", "uYtOqsFbKhhEjc3zFe1AlHDaGEz2", "wzn4aVKA1Ja8D7ifTq1NzOCaWex1"] 
+    banned = ["oldsz6oBFprLHMCOZ8RrY5qC4NqyWN2", "uYtOqsFbKhhEjc3zFe1AlHDaGEz2", "wzn4aVKA1Ja8D7ifTq1NzOCaWex1", "9Y00mt5TXdb2jZnDHANZQJjFzK43"] 
     for user_id_file in os.listdir("marked/" + str(ws)):
         user_id = user_id_file.replace("_" + str(ws) + ".csv", "")
         if user_id in banned: 
