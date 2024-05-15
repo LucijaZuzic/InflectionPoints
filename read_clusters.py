@@ -97,6 +97,9 @@ def process_ws(ws):
                             dict_user_clus[algo][num_clus][user_id][merge_reference] += 1 
 
     for algo in dict_user_clus:
+        str1 = "5"
+        str2 = "20"
+        str3 = "user"
         for num_clus in dict_user_clus[algo]:
             avg_5 = list(dict_actual_5[algo][num_clus].values())
             avg_20 = list(dict_actual_20[algo][num_clus].values())
@@ -106,7 +109,16 @@ def process_ws(ws):
                 avg_user[user_id] = list(dict_user_clus[algo][num_clus][user_id].values())
                 avg_avg_user[user_id] = np.average(avg_user[user_id])
             avg_avg_avg_user = list(avg_avg_user.values())
+            v1 = np.round(np.average(avg_5) / 5 * 100, 2)
+            v2 = np.round(np.average(avg_20) / 20 * 100, 2)
+            v3 = np.round(np.average(avg_avg_avg_user) / 5 * 100, 2)
+            str1 += " & $" + str(v1) + "$"
+            str2 += " & $" + str(v2) + "$"
+            str3 += " & $" + str(v3) + "$"
             print(algo, num_clus, np.average(avg_5), np.average(avg_20), np.average(avg_avg_avg_user))
             print(algo, num_clus, np.average(avg_5) / 5 * 100, np.average(avg_20) / 20 * 100, np.average(avg_avg_avg_user) / 5 * 100)
+        print(str1)
+        print(str2)
+        print(str3)
 process_ws(10)
 process_ws(20)
