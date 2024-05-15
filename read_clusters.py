@@ -115,10 +115,10 @@ def process_ws(ws):
             str1 += " & $" + str(v1) + "$"
             str2 += " & $" + str(v2) + "$"
             str3 += " & $" + str(v3) + "$"
-            print(algo, num_clus, np.average(avg_5), np.average(avg_20), np.average(avg_avg_avg_user))
-            print(algo, num_clus, np.average(avg_5) / 5 * 100, np.average(avg_20) / 20 * 100, np.average(avg_avg_avg_user) / 5 * 100)
-        print(str1)
-        print(str2)
-        print(str3)
+            #print(algo, num_clus, np.average(avg_5), np.average(avg_20), np.average(avg_avg_avg_user))
+            print(num_clus, "&", v1, "&", v2, "&", v3, "\\\\ \\hline")
+        print(str1, "\\\\ \\hline")
+        print(str2, "\\\\ \\hline")
+        print(str3, "\\\\ \\hline")
 process_ws(10)
 process_ws(20)
