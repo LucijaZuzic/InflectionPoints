@@ -93,15 +93,26 @@ for subdir_name in os.listdir("marker_count"):
                     if list_labels[ix] == lab:
                         clusters_x[lab].append(X_embedded[ix][0])
                         clusters_y[lab].append(X_embedded[ix][1])
+            
             for ix_lab in range(len(set_labels)):
                 lab = set_labels[ix_lab]
                 color_use = random_colors_set[ix_lab]
                 plt.scatter(clusters_x[lab], clusters_y[lab], c = color_use, label = str(lab))
-            
+            plt.axis("off")
+            plt.savefig(new_name_png.replace(".png", "_no_legend.png"), bbox_inches = "tight")
+            plt.close()
+
+            for ix_lab in range(len(set_labels)):
+                lab = set_labels[ix_lab]
+                color_use = random_colors_set[ix_lab]
+                plt.scatter(clusters_x[lab], clusters_y[lab], c = color_use, label = str(lab))
             plt.legend(ncol = int(np.sqrt(len(set_labels))), loc = "lower left", bbox_to_anchor = (0, - np.sqrt(0.12 * (len(set_labels) / int(np.sqrt(len(set_labels))))) / 1.25))
             plt.xlabel("TSNE Feature 1")
             plt.ylabel("TSNE Feature 2")
-            plt.title("DBSCAN\nMinimum " + str(num_clus) + " samples")
+            ws = 10
+            if "20" in csv_file:
+                ws = 20
+            plt.title("DBSCAN\nWindow size " + str(ws) + "\nMinimum " + str(num_clus) + " samples")
             plt.savefig(new_name_png, bbox_inches = "tight")
             plt.close()
 

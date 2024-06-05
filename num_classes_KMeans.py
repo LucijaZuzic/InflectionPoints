@@ -93,15 +93,26 @@ for subdir_name in os.listdir("marker_count"):
                     if list_labels[ix] == lab:
                         clusters_x[lab].append(X_embedded[ix][0])
                         clusters_y[lab].append(X_embedded[ix][1])
+
             for ix_lab in range(len(set_labels)):
                 lab = set_labels[ix_lab]
                 color_use = random_colors_set[ix_lab]
                 plt.scatter(clusters_x[lab], clusters_y[lab], c = color_use, label = str(lab))
-            
+            plt.axis("off")
+            plt.savefig(new_name_png.replace(".png", "_no_legend.png"), bbox_inches = "tight")
+            plt.close()
+
+            for ix_lab in range(len(set_labels)):
+                lab = set_labels[ix_lab]
+                color_use = random_colors_set[ix_lab]
+                plt.scatter(clusters_x[lab], clusters_y[lab], c = color_use, label = str(lab))
             plt.legend(ncol = int(np.sqrt(num_clus)), loc = "lower left", bbox_to_anchor = (0, - np.sqrt(0.12 * (num_clus / int(np.sqrt(num_clus)))) / 1.25))
             plt.xlabel("TSNE Feature 1")
             plt.ylabel("TSNE Feature 2")
-            plt.title("KMeans\n" + str(num_clus) + " clusters")
+            ws = 10
+            if "20" in csv_file:
+                ws = 20
+            plt.title("KMeans\nWindow size " + str(ws) + "\n" + str(num_clus) + " clusters")
             plt.savefig(new_name_png, bbox_inches = "tight")
             plt.close()
 
