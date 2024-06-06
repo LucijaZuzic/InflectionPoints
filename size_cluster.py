@@ -332,6 +332,7 @@ def did_choose_set(set_ref, ws):
         break
 
     for cls in [True, False]:
+        break
         avg_user = dict()
         avg_avg_user = dict()
         avg_w_user = dict()
@@ -435,6 +436,7 @@ def did_choose_set(set_ref, ws):
         break
 
     for cls in [True, False]:
+        break
         avg_user = []
         avg_w_user = []
         avg_w = []
@@ -497,7 +499,7 @@ for algo in cluster_for_ref_10:
             if not cluster_for_ref_20[algo][num_clus][ref] == maxclus20:
                 not_in_largest20.add(ref)
         sets_ref = [in_both_smallest, in_one_smallest, dict_how_many_classes10[algo][num_clus][minclus10], dict_how_many_classes20[algo][num_clus][minclus20], not_in_both_largest, not_in_one_largest, not_in_largest10, not_in_largest20]
-        if algo == "KMeans" and num_clus == 2:
+        if algo == "KMeans" and num_clus < 6:
             print(algo, num_clus, np.round(equal_num / (equal_num + not_equal_num) * 100, 2), np.round(len(in_both_smallest) / len(cluster_for_ref_10[algo][num_clus]) * 100, 2), np.round(len(in_one_smallest) / len(cluster_for_ref_10[algo][num_clus]) * 100, 2), np.round(minsize10 / len(cluster_for_ref_10[algo][num_clus]) * 100, 2), np.round(minsize20 / len(cluster_for_ref_20[algo][num_clus]) * 100, 2))
             print(algo, num_clus, np.round(equal_num / (equal_num + not_equal_num) * 100, 2), np.round(len(not_in_both_largest) / len(cluster_for_ref_10[algo][num_clus]) * 100, 2), np.round(len(not_in_one_largest) / len(cluster_for_ref_10[algo][num_clus]) * 100, 2), np.round(100 - maxsize10 / len(cluster_for_ref_10[algo][num_clus]) * 100, 2), np.round(100 - maxsize20 / len(cluster_for_ref_20[algo][num_clus]) * 100, 2))
             for set_ref in [dict_how_many_classes20[algo][num_clus][minclus20]]:
