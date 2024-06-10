@@ -92,7 +92,13 @@ def labels_to_use(name):
                 
                 continue
 
-            file_csv = pd.read_csv("marker_count/" + subdir_name + "/" + csv_file, sep = ";", index_col = False)
+            if not os.path.isfile("labels" + name + ".csv"):
+            
+                file_csv = pd.read_csv("marker_count/" + subdir_name + "/" + csv_file, sep = ";", index_col = False)
+
+            else:
+
+                file_csv = pd.read_csv("labels" + name + ".csv", sep = ";", index_col = False)
 
             colname_sum = dict()
 
@@ -123,11 +129,16 @@ def labels_to_use(name):
             print(csv_file, len(file_csv.columns[3:]), suma, sumsums, suma / sumsums) 
 
             X = dict()
+            dicti_new = {"vehicle": list(file_csv["vehicle"]), "ride": list(file_csv["ride"]), "ws": list(file_csv["ws"])}
             for ix in range(len(file_csv["vehicle"])):
                 ref = file_csv["vehicle"][ix].split("_")[-1] + "_" + file_csv["ride"][ix].split("_")[-1]
                 X[ref] = dict()
                 for val in sorted(list(set_used)):
                     X[ref][val] = file_csv[val][ix]
+            for val in sorted(list(set_used)):
+                dicti_new[val] = file_csv[val]
+            df_new = pd.DataFrame(dicti_new)
+            df_new.to_csv("labels" + name + ".csv", sep = ";", index = False)
             return X
         
 def avg_yes_no(set_ref, lab_set):
