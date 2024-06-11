@@ -78,98 +78,23 @@ def process_ws(ws):
             minimaxdict[algo][num_clus] = (maxsize, maxclus, minsize, minclus)
     return cluster_for_ref, minimaxdict, dict_how_many_classes
 
-def labels_to_use(name):
-    
-    for subdir_name in os.listdir("marker_count"):
-        
-        for csv_file in os.listdir("marker_count/" + subdir_name):
+def euclid_yes_no(set_ref, ws, algo, num_clus, df_use):
 
-            if ".csv" not in csv_file:
-                
-                continue  
-
-            if name not in csv_file:
-                
-                continue
-
-            if not os.path.isfile("labels" + name + ".csv"):
-            
-                file_csv = pd.read_csv("marker_count/" + subdir_name + "/" + csv_file, sep = ";", index_col = False)
-
-            else:
-
-                file_csv = pd.read_csv("labels" + name + ".csv", sep = ";", index_col = False)
-
-            colname_sum = dict()
-
-            sumsums = 0
-
-            for colname in file_csv.columns[3:]:
-
-                colname_sum[colname] = sum(file_csv[colname])
-
-                sumsums += colname_sum[colname]
-
-            set_used = set()
-
-            suma = 0
-
-            for val in dict(sorted(colname_sum.items(), key = lambda item: item[1], reverse = True)):
-
-                if len(set_used) == 200:
-
-                    break
-
-                else:
-
-                    set_used.add(val)  
-
-                    suma += colname_sum[val]
-
-            print(csv_file, len(file_csv.columns[3:]), suma, sumsums, suma / sumsums) 
-
-            X = dict()
-            dicti_new = {"vehicle": list(file_csv["vehicle"]), "ride": list(file_csv["ride"]), "ws": list(file_csv["ws"])}
-            for ix in range(len(file_csv["vehicle"])):
-                ref = file_csv["vehicle"][ix].split("_")[-1] + "_" + file_csv["ride"][ix].split("_")[-1]
-                X[ref] = dict()
-                for val in sorted(list(set_used)):
-                    X[ref][val] = file_csv[val][ix]
-            for val in sorted(list(set_used)):
-                dicti_new[val] = file_csv[val]
-            df_new = pd.DataFrame(dicti_new)
-            df_new.to_csv("labels" + name + ".csv", sep = ";", index = False)
-            return X
-        
-def avg_yes_no(set_ref, lab_set):
-    avg_dict_yes = dict()
-    avg_dict_no = dict()
-    avg_dict = dict()
-    for ref in lab_set:
-        for val in lab_set[ref]:
-            avg_dict_yes[val] = []
-            avg_dict_no[val] = []
-            avg_dict[val] = []
-    for ref in lab_set:
-        if ref in set_ref:
-            for val in lab_set[ref]:
-                avg_dict[val].append(lab_set[ref][val])
-                avg_dict_yes[val].append(lab_set[ref][val])
-        else:
-            for val in lab_set[ref]:
-                avg_dict[val].append(lab_set[ref][val])
-                avg_dict_no[val].append(lab_set[ref][val])
-    for val in avg_dict_yes:
-        avg_dict_yes[val] = np.average(avg_dict_yes[val])
-        avg_dict_no[val] = np.average(avg_dict_no[val])
-        avg_dict[val] = np.average(avg_dict[val])
-        if avg_dict_no[val] >= 0.01 or avg_dict_yes[val] >= 0.01 or avg_dict[val] >= 0.01:
-            print(val, np.round(avg_dict_yes[val] * 100, 2), np.round(avg_dict_no[val] * 100, 2), np.round(avg_dict[val] * 100, 2))
-    #print(avg_dict_yes)
-    #print(avg_dict_no)
-    #print(avg_dict)
-
-def euclid_yes_no(set_ref, ws):
+    vals_list = ["one_euclid", "one_ord", 
+                 "one_not_euclid", "one_not_ord", 
+                 "first_euclid", "first_ord", 
+                 "second_euclid", "second_ord", 
+                 "first_not_euclid", "first_not_ord", 
+                 "second_not_euclid", "second_not_ord", 
+                 "yes_no_euclid", "yes_no_ord", 
+                 "no_yes_euclid", "no_yes_ord", 
+                 "both_euclid", "both_ord", 
+                 "none_euclid", "none_ord", 
+                 "one_one_euclid", "one_one_ord", 
+                 "ws", "algo", "num_clus"]
+    for v in vals_list:
+        if v not in df_use:
+            df_use[v] = []
 
     file_distance_json = open("count_me/all_percent_1/marker_all_percent_1_" + str(ws) + ".json", "r")
 
@@ -243,20 +168,72 @@ def euclid_yes_no(set_ref, ws):
                 no_yes_ord.append(ord)
             if (r1 not in set_ref and r2 in set_ref) or (r2 not in set_ref and r1 in set_ref):
                 one_one_euclid.append(euclid)
-                one_one_ord.append(ord)
+                one_one_ord.append(ord) 
     #print(np.average(one_euclid), np.average(one_ord))
+    df_use["one_euclid"].append(np.average(one_euclid))
+    df_use["one_ord"].append(np.average(one_ord))
     #print(np.average(one_not_euclid), np.average(one_not_ord))
+    df_use["one_not_euclid"].append(np.average(one_not_euclid))
+    df_use["one_not_ord"].append(np.average(one_not_ord))
     #print(np.average(first_euclid), np.average(first_ord))
+    df_use["first_euclid"].append(np.average(first_euclid))
+    df_use["first_ord"].append(np.average(first_ord))
     #print(np.average(second_euclid), np.average(second_ord))
+    df_use["second_euclid"].append(np.average(second_euclid))
+    df_use["second_ord"].append(np.average(second_ord))
     #print(np.average(first_not_euclid), np.average(first_not_ord))
+    df_use["first_not_euclid"].append(np.average(first_not_euclid))
+    df_use["first_not_ord"].append(np.average(first_not_ord))
     #print(np.average(second_not_euclid), np.average(second_not_ord))
+    df_use["second_not_euclid"].append(np.average(second_not_euclid))
+    df_use["second_not_ord"].append(np.average(second_not_ord))
     #print(np.average(yes_no_euclid), np.average(yes_no_ord))
+    df_use["yes_no_euclid"].append(np.average(yes_no_euclid))
+    df_use["yes_no_ord"].append(np.average(yes_no_ord))
     #print(np.average(no_yes_euclid), np.average(no_yes_ord))
-    print(np.average(both_euclid), np.average(both_ord))
-    print(np.average(none_euclid), np.average(none_ord))
-    print(np.average(one_one_euclid), np.average(one_one_ord))
+    df_use["no_yes_euclid"].append(np.average(no_yes_euclid))
+    df_use["no_yes_ord"].append(np.average(no_yes_ord))
+    #print(np.round(np.average(both_euclid), 4), np.round(np.average(both_ord), 2))
+    df_use["both_euclid"].append(np.average(both_euclid))
+    df_use["both_ord"].append(np.average(both_ord))
+    #print(np.round(np.average(none_euclid), 4), np.round(np.average(none_ord), 2))
+    df_use["none_euclid"].append(np.average(none_euclid))
+    df_use["none_ord"].append(np.average(none_ord))
+    #print(np.round(np.average(one_one_euclid), 4), np.round(np.average(one_one_ord), 2))
+    df_use["one_one_euclid"].append(np.average(one_one_euclid))
+    df_use["one_one_ord"].append(np.average(one_one_ord))
+    df_use["ws"].append(ws)
+    df_use["algo"].append(algo)
+    df_use["num_clus"].append(num_clus)
+    return (both_euclid, both_ord, none_euclid, none_ord, one_one_euclid, one_one_ord)
 
-def did_choose_set(set_ref, ws): 
+def did_choose_set(set_ref, ws, algo, num_clus, df_use): 
+    vals_list = ["sum_main", "len_main", "avg_main",
+                 "sum_20", "len_20", "avg_20",
+                 "sum_5", "len_5", "avg_5",
+                 "number_20_average", "number_5_average", 
+                 "user_avg", "user_avg_5", "user_avg_no_skip",
+                 "ws", "algo", "num_clus"]
+    for v in vals_list:
+        if v not in df_use:
+            df_use[v] = []
+            if "user_" in v:
+                df_use[v.replace("user_", "algo_")] = []
+                for cls in [True, False]:
+                    df_use[v.replace("user_", "algo_") + "_" + str(cls)] = []
+                    df_use[v + "_" + str(cls)] = []
+
+    df_use_classes = dict()    
+    for start in ["user", "algo"]:
+        df_use_classes[start + "_classes_class"] = []
+        df_use_classes[start + "_classes_size"] = []
+        df_use_classes[start + "_classes_5_class"] = []
+        df_use_classes[start + "_classes_5_size"] = []
+        for cls in [True, False]:
+            df_use_classes[start + "_classes_" + str(cls) + "_class"] = []
+            df_use_classes[start + "_classes_" + str(cls) + "_size"] = []
+            df_use_classes[start + "_classes_5_" + str(cls) + "_class"] = []
+            df_use_classes[start + "_classes_5_" + str(cls) + "_size"] = []
 
     file_distance_json = open("count_me/all_percent_1/marker_all_percent_1_" + str(ws) + ".json", "r")
 
@@ -336,154 +313,247 @@ def did_choose_set(set_ref, ws):
                     number_5_split.append(class_of_ref[other_reference])
             number_20_average.append(np.sum(number_20_split) / len(number_20_split))
             number_5_average.append(np.sum(number_5_split) / len(number_5_split))
-        print(np.sum(main_number) / len(main_number), np.sum(main_number), len(main_number))
-        print(np.sum(number_20) / len(number_20), np.sum(number_20), len(number_20))
-        print(np.sum(number_5) / len(number_5), np.sum(number_5), len(number_5))
-        print(np.average(number_20_average), np.average(number_5_average))
+        #print(np.sum(main_number) / len(main_number), np.sum(main_number), len(main_number))
+        #print(np.sum(number_20) / len(number_20), np.sum(number_20), len(number_20))
+        #print(np.sum(number_5) / len(number_5), np.sum(number_5), len(number_5))
+        #print(np.average(number_20_average), np.average(number_5_average))
+        
+        df_use["sum_main"].append(np.sum(main_number))
+        df_use["len_main"].append(len(main_number))
+        df_use["avg_main"].append(np.sum(main_number) / len(main_number))
+
+        df_use["sum_20"].append(np.sum(number_20))
+        df_use["len_20"].append(len(number_20))
+        df_use["avg_20"].append(np.sum(number_20) / len(number_20))
+
+        df_use["sum_5"].append(np.sum(number_5))
+        df_use["len_5"].append(len(number_5))
+        df_use["avg_5"].append(np.sum(number_5) / len(number_5))
+        
+        df_use["number_20_average"].append(np.average(number_20_average))
+        df_use["number_5_average"].append(np.average(number_5_average))
+
         break
 
     for cls in [True, False]:
-        break
-        avg_user = dict()
-        avg_avg_user = dict()
-        avg_w_user = dict()
-        avg_avg_w_user = dict()
-        avg_w = dict()
-        avg_avg_w = dict()
-        lenw = dict()
-        lenm = dict()
+        avg_one_cls_user_user = dict()
+        avg_one_cls_user_avg_one_cls_user_user = dict()
+        avg_one_cls_user_w_user = dict()
+        avg_one_cls_user_avg_one_cls_user_w_user = dict()
+        avg_one_cls_user_w = dict()
+        avg_one_cls_user_avg_one_cls_user_w = dict()
+        lenw_one_cls_user = dict()
+        lenm_one_cls_user = dict()
         for user_id in dict_user_clus:
-            avg_user[user_id] = []
-            avg_w_user[user_id] = []
-            avg_w[user_id] = []
-            lenw[user_id] = dict()
-            lenm[user_id] = dict()
+            avg_one_cls_user_user[user_id] = []
+            avg_one_cls_user_w_user[user_id] = []
+            avg_one_cls_user_w[user_id] = []
+            lenw_one_cls_user[user_id] = dict()
+            lenm_one_cls_user[user_id] = dict()
             for ref in dict_user_clus[user_id]:
                 if class_of_ref[ref] != cls:
                     continue
                 if min(dict_actual_20[ref], 5) != 0:
-                    avg_user[user_id].append(dict_user_clus[user_id][ref] / min(dict_actual_20[ref], 5))
-                    avg_w_user[user_id].append(dict_user_clus[user_id][ref] / 5)
-                avg_w[user_id].append(dict_user_clus[user_id][ref] / 5)
-                if dict_actual_20[ref] not in lenw[user_id]:
-                    lenw[user_id][dict_actual_20[ref]] = 0
-                lenw[user_id][dict_actual_20[ref]] += 1
-                if min(dict_actual_20[ref], 5) not in lenm[user_id]:
-                    lenm[user_id][min(dict_actual_20[ref], 5)] = 0
-                lenm[user_id][min(dict_actual_20[ref], 5)] += 1
-            if len(avg_w[user_id]) < 1:
+                    avg_one_cls_user_user[user_id].append(dict_user_clus[user_id][ref] / min(dict_actual_20[ref], 5))
+                    avg_one_cls_user_w_user[user_id].append(dict_user_clus[user_id][ref] / 5)
+                avg_one_cls_user_w[user_id].append(dict_user_clus[user_id][ref] / 5)
+                if dict_actual_20[ref] not in lenw_one_cls_user[user_id]:
+                    lenw_one_cls_user[user_id][dict_actual_20[ref]] = 0
+                lenw_one_cls_user[user_id][dict_actual_20[ref]] += 1
+                if min(dict_actual_20[ref], 5) not in lenm_one_cls_user[user_id]:
+                    lenm_one_cls_user[user_id][min(dict_actual_20[ref], 5)] = 0
+                lenm_one_cls_user[user_id][min(dict_actual_20[ref], 5)] += 1
+            if len(avg_one_cls_user_w[user_id]) < 1:
                 continue
-            avg_avg_user[user_id] = np.average(avg_user[user_id])
-            avg_avg_w_user[user_id] = np.average(avg_w_user[user_id])
-            avg_avg_w[user_id] = np.average(avg_w[user_id])
-        if len(avg_avg_w) < 1:
+            avg_one_cls_user_avg_one_cls_user_user[user_id] = np.average(avg_one_cls_user_user[user_id])
+            avg_one_cls_user_avg_one_cls_user_w_user[user_id] = np.average(avg_one_cls_user_w_user[user_id])
+            avg_one_cls_user_avg_one_cls_user_w[user_id] = np.average(avg_one_cls_user_w[user_id])
+        if len(avg_one_cls_user_avg_one_cls_user_w) < 1:
+            df_use["user_avg_" + str(cls)].append(0)
+            df_use["user_avg_5_" + str(cls)].append(0)
+            df_use["user_avg_no_skip_" + str(cls)].append(0)
             continue
-        print(np.round(np.average(list(avg_avg_user.values())) * 100, 2))
-        print(np.round(np.average(list(avg_avg_w_user.values())) * 100, 2))
-        print(np.round(np.average(list(avg_avg_w.values())) * 100, 2))
+        #print(np.round(np.average(list(avg_one_cls_user_avg_one_cls_user_user.values())) * 100, 2))
+        #print(np.round(np.average(list(avg_one_cls_user_avg_one_cls_user_w_user.values())) * 100, 2))
+        #print(np.round(np.average(list(avg_one_cls_user_avg_one_cls_user_w.values())) * 100, 2))
+        df_use["user_avg_" + str(cls)].append(np.average(list(avg_one_cls_user_avg_one_cls_user_user.values())) * 100)
+        df_use["user_avg_5_" + str(cls)].append(np.average(list(avg_one_cls_user_avg_one_cls_user_w_user.values())) * 100)
+        df_use["user_avg_no_skip_" + str(cls)].append(np.average(list(avg_one_cls_user_avg_one_cls_user_w.values())) * 100)
         for user_id in dict_user_clus:
-            print(lenw[user_id])
-            print(lenm[user_id])
+            #print(lenw_one_cls_user[user_id])
+            #print(lenm_one_cls_user[user_id])
+            for cls_v in lenw_one_cls_user[user_id]:
+                df_use_classes["user_classes_" + str(cls) + "_class"].append(cls_v)
+                df_use_classes["user_classes_" + str(cls) + "_size"].append(lenw_one_cls_user[user_id][cls_v])
+            for cls_v in lenm_one_cls_user[user_id]:
+                df_use_classes["user_classes_5_" + str(cls) + "_class"].append(cls_v)
+                df_use_classes["user_classes_5_" + str(cls) + "_size"].append(lenm_one_cls_user[user_id][cls_v])
             break
 
-    avg_user = dict()
-    avg_avg_user = dict()
-    avg_w_user = dict()
-    avg_avg_w_user = dict()
-    avg_w = dict()
-    avg_avg_w = dict()
-    lenw = dict()
-    lenm = dict()
+    avg_all_cls_user_user = dict()
+    avg_all_cls_user_avg_all_cls_user_user = dict()
+    avg_all_cls_user_w_user = dict()
+    avg_all_cls_user_avg_all_cls_user_w_user = dict()
+    avg_all_cls_user_w = dict()
+    avg_all_cls_user_avg_all_cls_user_w = dict()
+    lenw_all_cls_user = dict()
+    lenm_all_cls_user = dict()
     for user_id in dict_user_clus:
-        avg_user[user_id] = []
-        avg_w_user[user_id] = []
-        avg_w[user_id] = []
-        lenw[user_id] = dict()
-        lenm[user_id] = dict()
+        avg_all_cls_user_user[user_id] = []
+        avg_all_cls_user_w_user[user_id] = []
+        avg_all_cls_user_w[user_id] = []
+        lenw_all_cls_user[user_id] = dict()
+        lenm_all_cls_user[user_id] = dict()
         for ref in dict_user_clus[user_id]:
             if min(dict_actual_20[ref], 5) != 0:
-                avg_user[user_id].append(dict_user_clus[user_id][ref] / min(dict_actual_20[ref], 5))
-                avg_w_user[user_id].append(dict_user_clus[user_id][ref] / 5)
-            avg_w[user_id].append(dict_user_clus[user_id][ref] / 5)
-            if dict_actual_20[ref] not in lenw[user_id]:
-                lenw[user_id][dict_actual_20[ref]] = 0
-            lenw[user_id][dict_actual_20[ref]] += 1
-            if min(dict_actual_20[ref], 5) not in lenm[user_id]:
-                lenm[user_id][min(dict_actual_20[ref], 5)] = 0
-            lenm[user_id][min(dict_actual_20[ref], 5)] += 1
-        avg_avg_user[user_id] = np.average(avg_user[user_id])
-        avg_avg_w_user[user_id] = np.average(avg_w_user[user_id])
-        avg_avg_w[user_id] = np.average(avg_w[user_id])
-    print(np.round(np.average(list(avg_avg_user.values())) * 100, 2))
-    print(np.round(np.average(list(avg_avg_w_user.values())) * 100, 2))
-    print(np.round(np.average(list(avg_avg_w.values())) * 100, 2))
+                avg_all_cls_user_user[user_id].append(dict_user_clus[user_id][ref] / min(dict_actual_20[ref], 5))
+                avg_all_cls_user_w_user[user_id].append(dict_user_clus[user_id][ref] / 5)
+            avg_all_cls_user_w[user_id].append(dict_user_clus[user_id][ref] / 5)
+            if dict_actual_20[ref] not in lenw_all_cls_user[user_id]:
+                lenw_all_cls_user[user_id][dict_actual_20[ref]] = 0
+            lenw_all_cls_user[user_id][dict_actual_20[ref]] += 1
+            if min(dict_actual_20[ref], 5) not in lenm_all_cls_user[user_id]:
+                lenm_all_cls_user[user_id][min(dict_actual_20[ref], 5)] = 0
+            lenm_all_cls_user[user_id][min(dict_actual_20[ref], 5)] += 1
+        avg_all_cls_user_avg_all_cls_user_user[user_id] = np.average(avg_all_cls_user_user[user_id])
+        avg_all_cls_user_avg_all_cls_user_w_user[user_id] = np.average(avg_all_cls_user_w_user[user_id])
+        avg_all_cls_user_avg_all_cls_user_w[user_id] = np.average(avg_all_cls_user_w[user_id])
+    #print(np.round(np.average(list(avg_all_cls_user_avg_all_cls_user_user.values())) * 100, 2), np.round(np.average(list(avg_all_cls_user_avg_all_cls_user_w_user.values())) * 100, 2), np.round(np.average(list(avg_all_cls_user_avg_all_cls_user_w.values())) * 100, 2))
+    df_use["user_avg"].append(np.average(list(avg_all_cls_user_avg_all_cls_user_user.values())) * 100)
+    df_use["user_avg_5"].append(np.average(list(avg_all_cls_user_avg_all_cls_user_w_user.values())) * 100)
+    df_use["user_avg_no_skip"].append(np.average(list(avg_all_cls_user_avg_all_cls_user_w.values())) * 100)
     for user_id in dict_user_clus:
-        print(lenw[user_id])
-        print(lenm[user_id])
+        #print(lenw_all_cls_user[user_id])
+        #print(lenm_all_cls_user[user_id])
+        for cls_v in lenw_all_cls_user[user_id]:
+            df_use_classes["user_classes_class"].append(cls_v)
+            df_use_classes["user_classes_size"].append(lenw_all_cls_user[user_id][cls_v])
+        for cls_v in lenm_all_cls_user[user_id]:
+            df_use_classes["user_classes_5_class"].append(cls_v)
+            df_use_classes["user_classes_5_size"].append(lenm_all_cls_user[user_id][cls_v])
         break
 
-    avg_user = []
-    avg_w_user = []
-    avg_w = []
-    lenw = dict()
-    lenm = dict()
+    avg_all_cls_user = []
+    avg_all_cls_w_user = []
+    avg_all_cls_w = []
+    lenw_all_cls = dict()
+    lenm_all_cls = dict()
     for ref in dict_user_clus[list(dict_user_clus.keys())[0]]:
         if min(dict_actual_20[ref], 5) != 0:
-            avg_user.append(dict_actual_5[ref] / min(dict_actual_20[ref], 5))
-            avg_w_user.append(dict_actual_5[ref] / 5)
-        avg_w.append(dict_actual_5[ref] / 5)
-        if dict_actual_20[ref] not in lenw:
-            lenw[dict_actual_20[ref]] = 0
-        lenw[dict_actual_20[ref]] += 1
-        if min(dict_actual_20[ref], 5) not in lenm:
-            lenm[min(dict_actual_20[ref], 5)] = 0
-        lenm[min(dict_actual_20[ref], 5)] += 1
-    print(np.round(np.average(avg_user) * 100, 2))
-    print(np.round(np.average(avg_w_user) * 100, 2))
-    print(np.round(np.average(avg_w) * 100, 2))
+            avg_all_cls_user.append(dict_actual_5[ref] / min(dict_actual_20[ref], 5))
+            avg_all_cls_w_user.append(dict_actual_5[ref] / 5)
+        avg_all_cls_w.append(dict_actual_5[ref] / 5)
+        if dict_actual_20[ref] not in lenw_all_cls:
+            lenw_all_cls[dict_actual_20[ref]] = 0
+        lenw_all_cls[dict_actual_20[ref]] += 1
+        if min(dict_actual_20[ref], 5) not in lenm_all_cls:
+            lenm_all_cls[min(dict_actual_20[ref], 5)] = 0
+        lenm_all_cls[min(dict_actual_20[ref], 5)] += 1
+    #print(np.round(np.average(avg_all_cls_user) * 100, 2), np.round(np.average(avg_all_cls_w_user) * 100, 2), np.round(np.average(avg_all_cls_w) * 100, 2))
+    df_use["algo_avg"].append(np.average(avg_all_cls_user) * 100)
+    df_use["algo_avg_5"].append(np.average(avg_all_cls_w_user) * 100)
+    df_use["algo_avg_no_skip"].append(np.average(avg_all_cls_w) * 100)
     for user_id in dict_user_clus:
-        print(lenw)
-        print(lenm)
+        #print(lenw_all_cls)
+        #print(lenm_all_cls)
+        for cls_v in lenw_all_cls:
+            df_use_classes["algo_classes_class"].append(cls_v)
+            df_use_classes["algo_classes_size"].append(lenw_all_cls[cls_v])
+        for cls_v in lenm_all_cls:
+            df_use_classes["algo_classes_5_class"].append(cls_v)
+            df_use_classes["algo_classes_5_size"].append(lenm_all_cls[cls_v])
         break
 
     for cls in [True, False]:
-        break
-        avg_user = []
-        avg_w_user = []
-        avg_w = []
-        lenw = dict()
-        lenm = dict()
+        avg_one_cls_user = []
+        avg_one_cls_w_user = []
+        avg_one_cls_w = []
+        lenw_one_cls = dict()
+        lenm_one_cls = dict()
         for ref in dict_user_clus[list(dict_user_clus.keys())[0]]:
             if class_of_ref[ref] != cls:
                 continue
             if min(dict_actual_20[ref], 5) != 0:
-                avg_user.append(dict_actual_5[ref] / min(dict_actual_20[ref], 5))
-                avg_w_user.append(dict_actual_5[ref] / 5)
-            avg_w.append(dict_actual_5[ref] / 5)
-            if dict_actual_20[ref] not in lenw:
-                lenw[dict_actual_20[ref]] = 0
-            lenw[dict_actual_20[ref]] += 1
-            if min(dict_actual_20[ref], 5) not in lenm:
-                lenm[min(dict_actual_20[ref], 5)] = 0
-            lenm[min(dict_actual_20[ref], 5)] += 1
-        if len(avg_w) < 1:
+                avg_one_cls_user.append(dict_actual_5[ref] / min(dict_actual_20[ref], 5))
+                avg_one_cls_w_user.append(dict_actual_5[ref] / 5)
+            avg_one_cls_w.append(dict_actual_5[ref] / 5)
+            if dict_actual_20[ref] not in lenw_one_cls:
+                lenw_one_cls[dict_actual_20[ref]] = 0
+            lenw_one_cls[dict_actual_20[ref]] += 1
+            if min(dict_actual_20[ref], 5) not in lenm_one_cls:
+                lenm_one_cls[min(dict_actual_20[ref], 5)] = 0
+            lenm_one_cls[min(dict_actual_20[ref], 5)] += 1
+        if len(avg_one_cls_w) < 1:
+            df_use["algo_avg_" + str(cls)].append(0)
+            df_use["algo_avg_5_" + str(cls)].append(0)
+            df_use["algo_avg_no_skip_" + str(cls)].append(0)
             continue
-        print(np.round(np.average(avg_user) * 100, 2))
-        print(np.round(np.average(avg_w_user) * 100, 2))
-        print(np.round(np.average(avg_w) * 100, 2))
+        #print(np.round(np.average(avg_one_cls_user) * 100, 2))
+        #print(np.round(np.average(avg_one_cls_w_user) * 100, 2))
+        #print(np.round(np.average(avg_one_cls_w) * 100, 2))
+        df_use["algo_avg_" + str(cls)].append(np.average(avg_one_cls_user) * 100)
+        df_use["algo_avg_5_" + str(cls)].append(np.average(avg_one_cls_w_user) * 100)
+        df_use["algo_avg_no_skip_" + str(cls)].append(np.average(avg_one_cls_w) * 100)
         for user_id in dict_user_clus:
-            print(lenw)
-            print(lenm)
+            #print(lenw_one_cls)
+            #print(lenm_one_cls)
+            for cls_v in lenw_one_cls:
+                df_use_classes["algo_classes_" + str(cls) + "_class"].append(cls_v)
+                df_use_classes["algo_classes_" + str(cls) + "_size"].append(lenw_one_cls[cls_v])
+            for cls_v in lenm_one_cls:
+                df_use_classes["algo_classes_5_" + str(cls) + "_class"].append(cls_v)
+                df_use_classes["algo_classes_5_" + str(cls) + "_size"].append(lenm_one_cls[cls_v])
             break
+
+    #print(np.round(np.average(list(avg_all_cls_user_avg_all_cls_user_user.values())) * 100, 2), np.round(np.average(avg_all_cls_user) * 100, 2))
+    df_use["ws"].append(ws)
+    df_use["algo"].append(algo)
+    df_use["num_clus"].append(num_clus)
+
+    begin_dir = "df_use_classes/" + str(ws) + "/" + str(algo) + "/" + str(num_clus) + "/"
+
+    if not os.path.isdir(begin_dir):
+        os.makedirs(begin_dir)
+    
+    for start in ["user", "algo"]:
+
+        new_dict = {start + "_classes_class": df_use_classes[start + "_classes_class"], 
+                    start + "_classes_size": df_use_classes[start + "_classes_size"]}
+        df_use_classes_csv = pd.DataFrame(new_dict)
+        df_use_classes_csv.to_csv(begin_dir + "df_use_classes_" + start + ".csv")
+
+        new_dict = {start + "_classes_5_class": df_use_classes[start + "_classes_5_class"], 
+                    start + "_classes_5_size": df_use_classes[start + "_classes_5_size"]}
+        df_use_classes_csv = pd.DataFrame(new_dict)
+        df_use_classes_csv.to_csv(begin_dir + "df_use_classes_5_" + start + ".csv")
+        
+        for cls in [True, False]:
+            
+            new_dict = {start + "_classes_" + str(cls) + "_class": df_use_classes[start + "_classes_" + str(cls) + "_class"], 
+                        start + "_classes_" + str(cls) + "_size": df_use_classes[start + "_classes_" + str(cls) + "_size"]}
+            df_use_classes_csv = pd.DataFrame(new_dict)
+            df_use_classes_csv.to_csv(begin_dir + "df_use_classes_" + str(cls) + "_" + start + ".csv")
+
+            new_dict = {start + "_classes_5_" + str(cls) + "_class": df_use_classes[start + "_classes_5_" + str(cls) + "_class"], 
+                        start + "_classes_5_" + str(cls) + "_size": df_use_classes[start + "_classes_5_" + str(cls) + "_size"]}
+            df_use_classes_csv = pd.DataFrame(new_dict)
+            df_use_classes_csv.to_csv(begin_dir + "df_use_classes_5_" + str(cls) + "_" + start + ".csv")
+
+    return np.average(list(avg_all_cls_user_avg_all_cls_user_user.values())) * 100
 
 cluster_for_ref_10, minimaxdict10, dict_how_many_classes10 = process_ws(10)
 cluster_for_ref_20, minimaxdict20, dict_how_many_classes20 = process_ws(20)
 
-labels10 = labels_to_use("_all_percent_1_10")
-labels20 = labels_to_use("_all_percent_1_20")
-
+df_use_euclid = dict()
+df_use_choose = dict()
+did_choose_set_dict = dict()
+euclid_yes_no_dict = dict()
 for algo in cluster_for_ref_10:
+    did_choose_set_dict[algo] = dict()
+    euclid_yes_no_dict[algo] = dict()
     for num_clus in cluster_for_ref_10[algo]:
+        did_choose_set_dict[algo][num_clus] = dict()
+        euclid_yes_no_dict[algo][num_clus] = dict()
         equal_num = 0
         not_equal_num = 0
         in_both_smallest = set()
@@ -510,13 +580,37 @@ for algo in cluster_for_ref_10:
             if not cluster_for_ref_20[algo][num_clus][ref] == maxclus20:
                 not_in_largest20.add(ref)
         sets_ref = [in_both_smallest, in_one_smallest, dict_how_many_classes10[algo][num_clus][minclus10], dict_how_many_classes20[algo][num_clus][minclus20], not_in_both_largest, not_in_one_largest, not_in_largest10, not_in_largest20]
-        if algo == "KMeans" and num_clus < 6:
-            print(algo, num_clus, np.round(equal_num / (equal_num + not_equal_num) * 100, 2), np.round(len(in_both_smallest) / len(cluster_for_ref_10[algo][num_clus]) * 100, 2), np.round(len(in_one_smallest) / len(cluster_for_ref_10[algo][num_clus]) * 100, 2), np.round(minsize10 / len(cluster_for_ref_10[algo][num_clus]) * 100, 2), np.round(minsize20 / len(cluster_for_ref_20[algo][num_clus]) * 100, 2))
-            print(algo, num_clus, np.round(equal_num / (equal_num + not_equal_num) * 100, 2), np.round(len(not_in_both_largest) / len(cluster_for_ref_10[algo][num_clus]) * 100, 2), np.round(len(not_in_one_largest) / len(cluster_for_ref_10[algo][num_clus]) * 100, 2), np.round(100 - maxsize10 / len(cluster_for_ref_10[algo][num_clus]) * 100, 2), np.round(100 - maxsize20 / len(cluster_for_ref_20[algo][num_clus]) * 100, 2))
-            for set_ref in [dict_how_many_classes20[algo][num_clus][minclus20]]:
-                #avg_yes_no(set_ref, labels10) 
-                avg_yes_no(set_ref, labels20) 
-                #euclid_yes_no(set_ref, 10)
-                euclid_yes_no(set_ref, 20)
-                #did_choose_set(set_ref, 10)
-                did_choose_set(set_ref, 20)
+        
+        print(algo, num_clus, np.round(equal_num / (equal_num + not_equal_num) * 100, 2), np.round(len(in_both_smallest) / len(cluster_for_ref_10[algo][num_clus]) * 100, 2), np.round(len(in_one_smallest) / len(cluster_for_ref_10[algo][num_clus]) * 100, 2), np.round(minsize10 / len(cluster_for_ref_10[algo][num_clus]) * 100, 2), np.round(minsize20 / len(cluster_for_ref_20[algo][num_clus]) * 100, 2))
+        print(algo, num_clus, np.round(equal_num / (equal_num + not_equal_num) * 100, 2), np.round(len(not_in_both_largest) / len(cluster_for_ref_10[algo][num_clus]) * 100, 2), np.round(len(not_in_one_largest) / len(cluster_for_ref_10[algo][num_clus]) * 100, 2), np.round(100 - maxsize10 / len(cluster_for_ref_10[algo][num_clus]) * 100, 2), np.round(100 - maxsize20 / len(cluster_for_ref_20[algo][num_clus]) * 100, 2))
+        
+        euclid_yes_no_dict[algo][num_clus][10] = euclid_yes_no(dict_how_many_classes10[algo][num_clus][minclus10], 10, algo, num_clus, df_use_euclid)
+        euclid_yes_no_dict[algo][num_clus][20] = euclid_yes_no(dict_how_many_classes20[algo][num_clus][minclus20], 20, algo, num_clus, df_use_euclid)
+
+        did_choose_set_dict[algo][num_clus][10] = did_choose_set(dict_how_many_classes10[algo][num_clus][minclus10], 10, algo, num_clus, df_use_choose)
+        did_choose_set_dict[algo][num_clus][20] = did_choose_set(dict_how_many_classes20[algo][num_clus][minclus20], 20, algo, num_clus, df_use_choose)
+
+df_use_choose_csv = pd.DataFrame(df_use_choose)
+df_use_choose_csv.to_csv("df_use_choose.csv")
+
+df_use_euclid_csv = pd.DataFrame(df_use_euclid)
+df_use_euclid_csv.to_csv("df_use_euclid.csv")
+        
+for num_clus in did_choose_set_dict["KMeans"]:
+    printer = ""
+    for algo in ["KMeans", "DBSCAN"]:
+        v3 = np.round(did_choose_set_dict[algo][num_clus][10], 2)
+        v6 = np.round(did_choose_set_dict[algo][num_clus][20], 2)
+        if "DBSCAN" == algo:
+            printer += " & " + str(len(dict_how_many_classes10[algo][num_clus])) + " & " + str(v3) + " & " + str(len(dict_how_many_classes20[algo][num_clus])) + " & " + str(v6)
+        else:                
+            printer += str(num_clus) + " & " + str(v3) + " & " + str(v6)
+    print(printer, "\\\\ \\hline")
+    
+for algo in ["KMeans", "DBSCAN"]:
+    for ws in [10, 20]:
+        printer = ""
+        for num_clus in euclid_yes_no_dict["KMeans"]:
+            both_euclid, both_ord, none_euclid, none_ord, one_one_euclid, one_one_ord = euclid_yes_no_dict[algo][num_clus][ws]
+            printer += str(num_clus) + " & " + str(np.round(np.average(both_euclid), 4)) + " & " + str(np.round(np.average(both_ord), 2)) + " & " + str(np.round(np.average(none_euclid), 4)) + " & " + str(np.round(np.average(none_ord), 2)) + " & " + str(np.round(np.average(one_one_euclid), 4)) + " & " + str(np.round(np.average(one_one_ord), 2)) + " \\\\ \\hline\n"
+        print(printer)
