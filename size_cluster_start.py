@@ -6,7 +6,7 @@ list_clus = list(range(2, 21))
 for r in list(range(100, 121)):
     list_clus.append(r)
 
-def process_ws(ws):
+def process_ws(ws, dict_how_many_classes_merged):
 
     class_file = dict()
     for algo in ["DBSCAN", "KMeans"]:
@@ -67,6 +67,11 @@ def process_ws(ws):
             nd = dict()
             for cls_other in sorted(list(dict_how_many_classes[algo][num_clus].keys())):
                 nd[cls_other] = len(dict_how_many_classes[algo][num_clus][cls_other])
+                dict_how_many_classes_merged["ws"].append(ws)
+                dict_how_many_classes_merged["algo"].append(algo)
+                dict_how_many_classes_merged["num_clus"].append(num_clus)
+                dict_how_many_classes_merged["class"].append(cls_other)
+                dict_how_many_classes_merged["size"].append(nd[cls_other])
                 if nd[cls_other] > maxsize:
                     maxsize = nd[cls_other]
                     maxclus = cls_other
@@ -78,109 +83,17 @@ def process_ws(ws):
             minimaxdict[algo][num_clus] = (maxsize, maxclus, minsize, minclus)
     return cluster_for_ref, minimaxdict, dict_how_many_classes
 
-def labels_to_use(name):
-    
-    for subdir_name in os.listdir("marker_count"):
-        
-        for csv_file in os.listdir("marker_count/" + subdir_name):
+dict_how_many_classes_merged = {"ws": [], "algo": [], "num_clus": [], "class": [], "size": []}
+cluster_for_ref_10, minimaxdict10, dict_how_many_classes10 = process_ws(10, dict_how_many_classes_merged)
+cluster_for_ref_20, minimaxdict20, dict_how_many_classes20 = process_ws(20, dict_how_many_classes_merged)
+dict_how_many_classes_merged_csv = pd.DataFrame(dict_how_many_classes_merged)
+dict_how_many_classes_merged_csv.to_csv("dict_how_many_classes_merged.csv")
 
-            if ".csv" not in csv_file:
-                
-                continue  
-
-            if name not in csv_file:
-                
-                continue
-            
-            file_csv = pd.read_csv("marker_count/" + subdir_name + "/" + csv_file, sep = ";", index_col = False)
-
-            colname_sum = dict()
-
-            sumsums = 0
-
-            for colname in file_csv.columns[3:]:
-
-                colname_sum[colname] = sum(file_csv[colname])
-
-                sumsums += colname_sum[colname]
-
-            set_used = set()
-
-            suma = 0
-
-            for val in dict(sorted(colname_sum.items(), key = lambda item: item[1], reverse = True)):
-
-                if len(set_used) == 200:
-
-                    break
-
-                else:
-
-                    set_used.add(val)  
-
-                    suma += colname_sum[val]
-
-            print(csv_file, len(file_csv.columns[3:]), suma, sumsums, suma / sumsums) 
-
-            X = dict()
-            for ix in range(len(file_csv["vehicle"])):
-                ref = file_csv["vehicle"][ix].split("_")[-1] + "_" + file_csv["ride"][ix].split("_")[-1]
-                X[ref] = dict()
-                for val in sorted(list(set_used)):
-                    X[ref][val] = file_csv[val][ix]
-            return X
-        
-def avg_yes_no(set_ref, lab_set, ws, algo, num_clus):
-    avg_dict_yes = dict()
-    avg_dict_no = dict()
-    avg_dict = dict()
-    for ref in lab_set:
-        for val in lab_set[ref]:
-            avg_dict_yes[val] = []
-            avg_dict_no[val] = []
-            avg_dict[val] = []
-    for ref in lab_set:
-        if ref in set_ref:
-            for val in lab_set[ref]:
-                avg_dict[val].append(lab_set[ref][val])
-                avg_dict_yes[val].append(lab_set[ref][val])
-        else:
-            for val in lab_set[ref]:
-                avg_dict[val].append(lab_set[ref][val])
-                avg_dict_no[val].append(lab_set[ref][val])
-    df_new = {"seq": [], "yes": [], "no": [], "all": []}
-    for val in avg_dict_yes:
-        df_new["seq"].append(val)
-        df_new["yes"].append(np.average(avg_dict_yes[val]))
-        df_new["no"].append(np.average(avg_dict_no[val]))
-        df_new["all"].append(np.average(avg_dict[val]))
-        avg_dict_yes[val] = np.average(avg_dict_yes[val])
-        avg_dict_no[val] = np.average(avg_dict_no[val])
-        avg_dict[val] = np.average(avg_dict[val])
-        #if avg_dict[val] >= 0.01:
-            #print(val, np.round(avg_dict_yes[val] * 100, 2), np.round(avg_dict_no[val] * 100, 2), np.round(avg_dict[val] * 100, 2))
-    #print(avg_dict_yes)
-    #print(avg_dict_no)
-    #print(avg_dict)
-
-    begin_dir = "avg_yes_no/" + str(ws) + "/" + str(algo) + "/" + str(num_clus) + "/"
-
-    if not os.path.isdir(begin_dir):
-        os.makedirs(begin_dir)
-
-    df_avg_yes_no_csv = pd.DataFrame(df_new)
-    df_avg_yes_no_csv.to_csv(begin_dir + "avg_yes_no_" + str(ws) + "_" + str(algo) + "_" + str(num_clus) + ".csv")
-
-    return (avg_dict_yes, avg_dict_no, avg_dict)
-
-cluster_for_ref_10, minimaxdict10, dict_how_many_classes10 = process_ws(10)
-cluster_for_ref_20, minimaxdict20, dict_how_many_classes20 = process_ws(20)
-
-labels10 = labels_to_use("_all_percent_1_10")
-labels20 = labels_to_use("_all_percent_1_20")
-
+df_use_euclid = dict()
+df_use_choose = dict()
 did_choose_set_dict = dict()
 euclid_yes_no_dict = dict()
+
 for algo in cluster_for_ref_10:
     did_choose_set_dict[algo] = dict()
     euclid_yes_no_dict[algo] = dict()
@@ -213,9 +126,7 @@ for algo in cluster_for_ref_10:
             if not cluster_for_ref_20[algo][num_clus][ref] == maxclus20:
                 not_in_largest20.add(ref)
         sets_ref = [in_both_smallest, in_one_smallest, dict_how_many_classes10[algo][num_clus][minclus10], dict_how_many_classes20[algo][num_clus][minclus20], not_in_both_largest, not_in_one_largest, not_in_largest10, not_in_largest20]
-
+        
         print(algo, num_clus, np.round(equal_num / (equal_num + not_equal_num) * 100, 2), np.round(len(in_both_smallest) / len(cluster_for_ref_10[algo][num_clus]) * 100, 2), np.round(len(in_one_smallest) / len(cluster_for_ref_10[algo][num_clus]) * 100, 2), np.round(minsize10 / len(cluster_for_ref_10[algo][num_clus]) * 100, 2), np.round(minsize20 / len(cluster_for_ref_20[algo][num_clus]) * 100, 2))
         print(algo, num_clus, np.round(equal_num / (equal_num + not_equal_num) * 100, 2), np.round(len(not_in_both_largest) / len(cluster_for_ref_10[algo][num_clus]) * 100, 2), np.round(len(not_in_one_largest) / len(cluster_for_ref_10[algo][num_clus]) * 100, 2), np.round(100 - maxsize10 / len(cluster_for_ref_10[algo][num_clus]) * 100, 2), np.round(100 - maxsize20 / len(cluster_for_ref_20[algo][num_clus]) * 100, 2))
-
-        avg_yes_no(dict_how_many_classes10[algo][num_clus][minclus10], labels10, 10, algo, num_clus) 
-        avg_yes_no(dict_how_many_classes20[algo][num_clus][minclus20], labels20, 20, algo, num_clus) 
+        
