@@ -102,12 +102,14 @@ def process_ws(ws):
     return dict_user_clus, dict_actual_20, dict_how_many_classes
 
 list_clus_short = list(range(2, 21))
+for r in list(range(100, 121)):
+    list_clus_short.append(r)
 
 list_clus = list(range(2, 21))
 for r in list(range(100, 121)):
     list_clus.append(r)
 
-algo_list_short = ["DBSCAN"]
+algo_list_short = ["KMeans"]
 algo_list = ["KMeans", "DBSCAN"]
 
 dict_user_clus1, dict_actual_201, dict_how_many_classes1 = process_ws(10)

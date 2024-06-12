@@ -2,12 +2,14 @@ import numpy as np
 import pandas as pd
 
 list_clus_short = list(range(2, 21))
+for r in list(range(100, 121)):
+    list_clus_short.append(r)
 
 list_clus = list(range(2, 21))
 for r in list(range(100, 121)):
     list_clus.append(r)
 
-algo_list_short = ["DBSCAN"]
+algo_list_short = ["KMeans"]
 algo_list = ["KMeans", "DBSCAN"]
     
 avg_yes_no_dict = dict()
