@@ -7,7 +7,7 @@ list_clus = list(range(2, 21))
 for r in list(range(100, 121)):
     list_clus.append(r)
 
-algo_list_short = ["KMeans"]
+algo_list_short = ["DBSCAN"]
 algo_list = ["KMeans", "DBSCAN"]
     
 avg_yes_no_dict = dict()
@@ -50,7 +50,6 @@ for algo in algo_list:
 
 use_numclus = False
 print(changed)
-
 for ws in changed:
     for seq in changed[ws]:
         v3 = np.round(avg_yes_no_dict["KMeans"][2][ws][seq][2] * 100, 2)
@@ -62,13 +61,13 @@ for ws in changed:
             printer += " & " + algo + " yes & " + algo + " no"
         printer += " \\\\ \\hline\n"
         for num_clus in list_clus_short:
-            printer += str(num_clus)
+            printer += "$" + str(num_clus) + "$"
             for algo in algo_list_short:
                 v1 = np.round(avg_yes_no_dict[algo][num_clus][ws][seq][0] * 100, 2)
                 v2 = np.round(avg_yes_no_dict[algo][num_clus][ws][seq][1] * 100, 2)
                 if algo != "KMeans" and use_numclus:
-                    printer += " & " + str(len(dict_how_many_classes[algo][num_clus][ws]))
-                printer += " & " + str(v1) + " & " + str(v2)
+                    printer += " & $" + str(len(dict_how_many_classes[algo][num_clus][ws])) + "$"
+                printer += " & $" + str(v1) + "\\%$ & $" + str(v2) + "\\%$"
             printer += " \\\\ \\hline\n"
         #print(printer)
 
@@ -87,8 +86,8 @@ for algo in algo_list_short:
                 v2 = np.round(avg_yes_no_dict[algo][num_clus][10][seq][1] * 100, 2)
                 v4 = np.round(avg_yes_no_dict[algo][num_clus][20][seq][0] * 100, 2)
                 v5 = np.round(avg_yes_no_dict[algo][num_clus][20][seq][1] * 100, 2)
-                printer += str(num_clus)
+                printer += "$" + str(num_clus) + "$"
                 if algo != "KMeans" and use_numclus:
-                    printer += " & " + str(len(dict_how_many_classes[algo][num_clus][ws]))
-                printer += " & " + str(v1) + " & " + str(v2) + " & " + str(v4) + " & " + str(v5) + " \\\\ \\hline\n"
+                    printer += " & $" + str(len(dict_how_many_classes[algo][num_clus][ws])) + "$"
+                printer += " & $" + str(v1) + "\\%$ & $" + str(v2) + "\\%$ & $" + str(v4) + "\\%$ & $" + str(v5) + "\\%$ \\\\ \\hline\n"
             print(printer)

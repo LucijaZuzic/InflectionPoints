@@ -9,7 +9,7 @@ def process_ws(ws):
         class_file[algo] = dict()   
         for num_clus in list_clus:
             class_file[algo][num_clus] = dict()
-            new_name = "clustered/" + algo + "/" + str(num_clus) + "/all_percent_1/clustered_" + algo + "_" + str(num_clus) + "_marker_all_percent_1_" + str(ws) + ".csv"
+            new_name = "clustered/" + algo + "/" + str(num_clus) + "/all_percent_1/clustered_" + algo + "_"  + str(num_clus) + "_marker_all_percent_1_" + str(ws) + ".csv"
             file_new_name = pd.read_csv(new_name, index_col = False)
             for ix in range(len(file_new_name["vehicle"])):
                 nn = file_new_name["vehicle"][ix].split("_")[1] + "_" +  str(file_new_name["ride"][ix]).split("_")[1]
@@ -107,7 +107,7 @@ list_clus = list(range(2, 21))
 for r in list(range(100, 121)):
     list_clus.append(r)
 
-algo_list_short = ["KMeans"]
+algo_list_short = ["DBSCAN"]
 algo_list = ["KMeans", "DBSCAN"]
 
 dict_user_clus1, dict_actual_201, dict_how_many_classes1 = process_ws(10)
@@ -148,18 +148,25 @@ for ix in range(len(dict_how_many_classes_merged["ws"])):
     dict_how_many_classes[algo][num_clus][ws][class_marker] = size
 
 use_compare = True
-use_numclus = False
+use_numclus = True
 
 printer = "Parameter"
 for algo in algo_list_short:
     if algo != "KMeans" and use_numclus:
-        printer += " & Clusters"
+        printer += " & Clusters 10"
     if use_compare:
-            printer += " & " + algo + " 10 Anomaly & " + algo + " 10 Cluster & " + algo + " 20 Anomaly & " + algo + " 20 Cluster"
+            printer += " & " + algo + " 10 Anomaly & " + algo + " 10 Cluster"
     else:
-            printer += " & " + algo + " 10 Anomaly & " + algo + " 20 Anomaly"
+            printer += " & " + algo + " 10 Anomaly"
+    if algo != "KMeans" and use_numclus:
+        printer += " & Clusters 20"
+    if use_compare:
+            printer += " & " + algo + " 20 Anomaly & " + algo + " 20 Cluster"
+    else:
+            printer += " & " + algo + " 20 Anomaly"
 printer += " \\\\ \\hline\n"
 for num_clus in list_clus_short:
+    printer += "$" + str(num_clus) + "$"
     for algo in algo_list_short:
         v3 = np.round(did_choose_set_dict[algo][num_clus][10], 2)
         v6 = np.round(did_choose_set_dict[algo][num_clus][20], 2)
@@ -183,25 +190,44 @@ for num_clus in list_clus_short:
             avg_2avg_2user[user_id] = np.average(avg_2user[user_id])
         avg_2avg_2avg_2user = list(avg_2avg_2user.values())
         v61 = np.round(np.average(avg_2avg_2avg_2user) * 100, 2)
-        printer += str(num_clus)
         if algo != "KMeans" and use_numclus:
-            printer += " & " + str(len(dict_how_many_classes[algo][num_clus][ws]))
+            printer += " & $" + str(len(dict_how_many_classes[algo][num_clus][10])) + "$"
         if use_compare:
-            printer += " & " + str(v3) + " & " + str(v31) + " & " + str(v6) + " & " + str(v61)
+            printer += " & $" + str(v3) + "\\%$ & $" + str(v31) + "\\%$"
         else:                
-            printer += " & " + str(v3) + " & " + str(v6)
+            printer += " & $" + str(v3) + "\\%$"
+        if algo != "KMeans" and use_numclus:
+            printer += " & $" + str(len(dict_how_many_classes[algo][num_clus][20])) + "$"
+        if use_compare:
+            printer += " & $" + str(v6) + "\\%$ & $" + str(v61) + "\\%$"
+        else:                
+            printer += " & $" + str(v6) + "\\%$"
     printer += " \\\\ \\hline\n"
 print(printer)
 
+use_numclus = False
+
 for algo in algo_list_short:
     for ws in [10, 20]:
-        print(algo + " " + str(ws)) 
-        print("Parameter & both euclid & both ord & none euclid & none ord & one one euclid & one one ord \\\\ \\hline")
+        #print(algo + " " + str(ws)) 
+        #print("Parameter & both euclid & both ord & none euclid & none ord & one one euclid & one one ord \\\\ \\hline")
         printer = ""
         for num_clus in list_clus_short:
             both_euclid, both_ord, none_euclid, none_ord, one_one_euclid, one_one_ord = euclid_yes_no_dict[algo][num_clus][ws]
-            printer += str(num_clus) + " & " + str(np.round(np.average(both_euclid), 4)) + " & " + str(np.round(np.average(both_ord), 2)) + " & " + str(np.round(np.average(none_euclid), 4)) + " & " + str(np.round(np.average(none_ord), 2)) + " & " + str(np.round(np.average(one_one_euclid), 4)) + " & " + str(np.round(np.average(one_one_ord), 2)) + " \\\\ \\hline\n"
-        print(printer)
+            printer += "$" + str(num_clus) + "$ & $" + str(np.round(np.average(both_euclid), 4)) + "$ & $" + str(np.round(np.average(both_ord), 2)) + "$ & $" + str(np.round(np.average(none_euclid), 4)) + "$ & $" + str(np.round(np.average(none_ord), 2)) + "$ & $" + str(np.round(np.average(one_one_euclid), 4)) + "$ & $" + str(np.round(np.average(one_one_ord), 2)) + "$ \\\\ \\hline\n"
+        #print(printer)
+        
+for algo in algo_list_short:
+    print(algo) 
+    print("Parameter & both 10 & none 10 & one one 10 & both 20 & none 20 & one one 20 \\\\ \\hline")
+    printer = ""
+    for num_clus in list_clus_short:
+        both_euclid1, both_ord1, none_euclid1, none_ord1, one_one_euclid1, one_one_ord1 = euclid_yes_no_dict[algo][num_clus][10]
+        both_euclid2, both_ord2, none_euclid2, none_ord2, one_one_euclid2, one_one_ord2 = euclid_yes_no_dict[algo][num_clus][20]
+        printer += "$" + str(num_clus) + "$ & $" + str(np.round(np.average(both_euclid1), 4)) + "$ & $" + str(np.round(np.average(one_one_euclid1), 4)) + "$ & $" + str(np.round(np.average(none_euclid1), 4)) + "$"
+        printer += " & $" + str(np.round(np.average(both_euclid2), 4)) + "$ & $" + str(np.round(np.average(none_euclid2), 4)) + "$ & $" + str(np.round(np.average(one_one_euclid2), 4)) + "$"
+        printer += " \\\\ \\hline\n"
+    print(printer)
         
 file_distance_json = open("count_me/all_percent_1/marker_all_percent_1_" + str(ws) + ".json", "r")
 
