@@ -109,10 +109,9 @@ plt.plot([0, 0], [miny, maxy], c = "k", linestyle = "dashed", linewidth = 1)
 plt.plot([minx, maxx], [0, 0], c = "k", linestyle = "dashed", linewidth = 1)
 make_arrow(0, maxy, 0.1, angle = np.pi / 2)
 make_arrow(maxx, 0, 0.1, angle = np.pi * 2)
-plt.plot(long, lat, linewidth = 2, label = "Original trajectory")
-plt.plot(long_new, lat_new, linewidth = 2, label = "Translated to a $0$ $x$ and $y$ starting coordinate and rotated")
-plt.plot(long_new2, lat_new2, linewidth = 2, label = "Translated trajectory to eliminate negative values")
-plt.scatter(long_new2, lat_new2, c = "b", zorder = 2, linewidth = 3, label = "Other points")
+plt.plot(long, lat, linewidth = 2, linestyle = "dashdot", label = "Original trajectory")
+plt.plot(long_new, lat_new, linewidth = 2, linestyle = "dotted", label = "Translated to a $0$ $x$ and $y$ starting coordinate and rotated")
+plt.plot(long_new2, lat_new2, linewidth = 2, label = "Mirrored trajectory to eliminate negative values")
 
 long_sgn = [long_new2[i + 1] > long_new2[i] for i in range(len(long_new2) - 1)]
 lat_sgn = [lat_new2[i + 1] > lat_new2[i] for i in range(len(lat_new2) - 1)]
@@ -139,11 +138,27 @@ for i in range(len(long_change_sgn)):
 print(mrkr)
 print(infls_long)
 print(infls_lat)
-
+labeled_original = False
+for num in range(len(long_new2)):
+    if num not in infls_lat and num not in infls_long:
+        if not labeled_original:
+            plt.scatter(long_new2[num], lat_new2[num], c = "b", zorder = 2, linewidth = 3, label = "Other points")
+            labeled_original = True
+        else:
+            plt.scatter(long_new2[num], lat_new2[num], c = "b", zorder = 2, linewidth = 3)
+labeled = False
 for num in infls_long:
-    plt.scatter(long_new2[num], lat_new2[num], c = "r", zorder = 2, linewidth = 3)
+    if not labeled:
+        plt.scatter(long_new2[num], lat_new2[num], c = "r", marker = "D", zorder = 2, linewidth = 3, label = "Inflection point")
+        labeled = True
+    else:
+        plt.scatter(long_new2[num], lat_new2[num], c = "r", marker = "D", zorder = 2, linewidth = 3)
 for num in infls_lat:
-    plt.scatter(long_new2[num], lat_new2[num], c = "r", zorder = 2, linewidth = 3, label = "Inflection point")
+    if not labeled:
+        plt.scatter(long_new2[num], lat_new2[num], c = "r", marker = "D", zorder = 2, linewidth = 3, label = "Inflection point")
+        labeled = True
+    else:
+        plt.scatter(long_new2[num], lat_new2[num], c = "r", marker = "D", zorder = 2, linewidth = 3)
 plt.legend()
 plt.savefig("rotate_illustrate_3.png", bbox_inches = "tight")
 plt.close()
