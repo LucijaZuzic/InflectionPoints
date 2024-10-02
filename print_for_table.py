@@ -1,6 +1,8 @@
 import os
-import pandas as pd
+import pandas as pd 
+import numpy as np
 from scipy import stats
+import matplotlib.pyplot as plt
 
 def process_ws(ws):
     file_distance_json = open("count_me/all_percent_1/marker_all_percent_1_" + str(ws) + ".json", "r")
@@ -70,10 +72,12 @@ def process_ws(ws):
 
     euclidean_min_to_max_usable = abs(euclidean_min_max_usable - euclidean_max_min_usable)
     euclidean_max_to_min_usable = euclidean_max_max_usable - euclidean_min_min_usable
+
+    print("Remove", euclidean_max_max_usable, euclidean_min_min_usable, euclidean_max_to_min_usable)
  
     euclidean_actual = dict()
     binary_actual = dict()
-    selected_actual = dict() 
+    selected_actual = dict()
     
     for user_id_file in os.listdir("marked/" + str(ws)):
         user_id = user_id_file.replace("_" + str(ws) + ".csv", "")
@@ -164,117 +168,73 @@ def process_ws(ws):
                 binary_flat_predicted_all.append(binary_user[user_id][merge_reference][b_ix]) 
             if len(euclidean_actual[merge_reference]) != len(euclidean_user[user_id][merge_reference]):
                 print("ERROR", user_id, merge_reference)
- 
-            #print(user_id, merge_reference, stats.ttest_ind(binary_actual[merge_reference], binary_user[user_id][merge_reference], equal_var = False))
-            #print(user_id, merge_reference, stats.ttest_ind(euclidean_actual[merge_reference], euclidean_user[user_id][merge_reference], equal_var = False))
-            #print(user_id, merge_reference, stats.ttest_ind(selected_actual[merge_reference], selected_user[user_id][merge_reference], equal_var = False))
+           
+    printed = False
+    sel = []
+    euc = []
+    fq = []
+    dd = dict()
+    for i in range(5):
+        dd[i] = []
+    for user_id_file in os.listdir("marked/" + str(ws)):
+        user_id = user_id_file.replace("_" + str(ws) + ".csv", "")
+        if user_id in banned: 
+            continue
+        for ix in range(len(file_user_id["vehicle"])):
+            merge_reference = str(file_user_id["vehicle"][ix]) + "_" + str(file_user_id["ride"][ix])
+            sel.append(abs(np.sum(selected_actual[merge_reference]) - np.sum(selected_user[user_id][merge_reference])))
+            euc.append(abs(np.sum(euclidean_actual[merge_reference]) - np.sum(euclidean_user[user_id][merge_reference])))
+            fq.append(sum([x < 5 for x in selected_user[user_id][merge_reference]]) / len(selected_user[user_id][merge_reference]))
+            for i in range(5):
+                dd[i].append(int(i in selected_user[user_id][merge_reference]))
+            if not printed and abs(np.sum(euclidean_actual[merge_reference]) - np.sum(euclidean_user[user_id][merge_reference])) > euclidean_min_min_usable:
+                printed = True
+                print(euclidean_user[user_id][merge_reference])
+                print(euclidean_actual[merge_reference])
+                print(np.sum(euclidean_actual[merge_reference]),)
+                print(np.sum(euclidean_user[user_id][merge_reference]))
+                print(abs(np.sum(euclidean_actual[merge_reference]) - np.sum(euclidean_user[user_id][merge_reference])))
+                print(euclidean_max_to_min_usable, euclidean_max_max_usable, euclidean_min_min_usable)
+                print(abs(np.sum(euclidean_actual[merge_reference]) - np.sum(euclidean_user[user_id][merge_reference])) / euclidean_max_to_min_usable)
+                print(selected_actual[merge_reference])
+                print([x * 114 + 1 for x in selected_actual[merge_reference]])
+                print(selected_user[user_id][merge_reference])
+                print([x * 114 + 1 for x in selected_user[user_id][merge_reference]])
+                print(np.sum(selected_actual[merge_reference]), np.sum(selected_user[user_id][merge_reference]), abs(np.sum(selected_actual[merge_reference]) - np.sum(selected_user[user_id][merge_reference])), abs(np.sum(selected_actual[merge_reference]) - np.sum(selected_user[user_id][merge_reference])) / 75)
+                print(sum([x < 5 for x in selected_user[user_id][merge_reference]]), sum([x < 5 for x in selected_user[user_id][merge_reference]]) / len(selected_user[user_id][merge_reference]))
+                #print(sel[-1], euc[-1], fq[-1])
+                #for i in range(5):
+                    #print(dd[i][-1])
 
-        #print(user_id, stats.ttest_ind(binary_flat_actual_user[user_id], binary_flat_predicted_user[user_id], equal_var = False))
-        #print(user_id, stats.ttest_ind(euclidean_flat_actual_user[user_id], euclidean_flat_predicted_user[user_id], equal_var = False))
-        #print(user_id, stats.ttest_ind(selected_flat_actual_user[user_id], selected_flat_predicted_user[user_id], equal_var = False))
-
-    euclidean_flat_users1 = []
-    binary_flat_users1 = []
-    selected_flat_users1 = []
-
-    euclidean_flat_users2 = []
-    binary_flat_users2 = []
-    selected_flat_users2 = []
-
-    euclidean_flat_users1_users2 = dict()
-    binary_flat_users1_users2 = dict()
-    selected_flat_users1_users2 = dict()
-
-    euclidean_flat_users2_users1 = dict()
-    binary_flat_users2_users1 = dict()
-    selected_flat_users2_users1 = dict()
- 
-    for user_id_file1 in os.listdir("marked/" + str(ws)):
-        user_id1 = user_id_file1.replace("_" + str(ws) + ".csv", "")
-        if user_id1 in banned: 
-            continue  
-        euclidean_flat_users1_users2[user_id1] = []
-        binary_flat_users1_users2[user_id1] = []
-        selected_flat_users1_users2[user_id1] = []
-        euclidean_flat_users2_users1[user_id1] = []
-        binary_flat_users2_users1[user_id1] = []
-        selected_flat_users2_users1[user_id1] = []
-        for user_id_file2 in os.listdir("marked/" + str(ws)):
-            user_id2 = user_id_file2.replace("_" + str(ws) + ".csv", "")
-            if user_id2 in banned: 
-                continue 
-            if user_id2 == user_id1: 
-                continue
-            for s_ix in range(len(selected_flat_predicted_user[user_id1])):
-                selected_flat_users1_users2[user_id1].append(selected_flat_predicted_user[user_id1][s_ix]) 
-                selected_flat_users2_users1[user_id1].append(selected_flat_predicted_user[user_id2][s_ix]) 
-                selected_flat_users1.append(selected_flat_predicted_user[user_id1][s_ix]) 
-                selected_flat_users2.append(selected_flat_predicted_user[user_id2][s_ix]) 
-            for e_ix in range(len(euclidean_flat_predicted_user[user_id1])):  
-                euclidean_flat_users1_users2[user_id1].append(euclidean_flat_predicted_user[user_id1][e_ix]) 
-                euclidean_flat_users2_users1[user_id1].append(euclidean_flat_predicted_user[user_id2][e_ix]) 
-                euclidean_flat_users1.append(euclidean_flat_predicted_user[user_id1][e_ix]) 
-                euclidean_flat_users2.append(euclidean_flat_predicted_user[user_id2][e_ix]) 
-            for b_ix in range(len(binary_flat_predicted_user[user_id1])):  
-                binary_flat_users1_users2[user_id1].append(binary_flat_predicted_user[user_id1][b_ix]) 
-                binary_flat_users2_users1[user_id1].append(binary_flat_predicted_user[user_id2][b_ix]) 
-                binary_flat_users1.append(binary_flat_predicted_user[user_id1][b_ix]) 
-                binary_flat_users2.append(binary_flat_predicted_user[user_id2][b_ix]) 
+    return sel, euc, fq, dd
             
-            #print(user_id1, user_id2, stats.ttest_ind(binary_flat_predicted_user[user_id1], binary_flat_predicted_user[user_id2], equal_var = False)) 
-            #print(user_id1, user_id2, stats.ttest_ind(euclidean_flat_predicted_user[user_id1], euclidean_flat_predicted_user[user_id2], equal_var = False))
-            #print(user_id1, user_id2, stats.ttest_ind(selected_flat_predicted_user[user_id1], selected_flat_predicted_user[user_id2], equal_var = False))
+sel1, euc1, fq1, dd1 = process_ws(10)
+sel2, euc2, fq2, dd2 = process_ws(20)
+pairs_to_test = {"Selection": (sel1, sel2), "Euclid": (euc1, euc2),  "Quartile": (fq1, fq2)}
+for i in dd1:
+    pairs_to_test[i] = (dd1[i], dd2[i])
 
-        #print(user_id1, stats.ttest_ind(binary_flat_users1_users2[user_id1], binary_flat_users2_users1[user_id1], equal_var = False))
-        #print(user_id1, stats.ttest_ind(euclidean_flat_users1_users2[user_id1], euclidean_flat_users2_users1[user_id1], equal_var = False))
-        #print(user_id1, stats.ttest_ind(selected_flat_users1_users2[user_id1], selected_flat_users2_users1[user_id1], equal_var = False))
-
-    list_return = [#binary_flat_actual_all, 
-                #binary_flat_predicted_all, 
-                euclidean_flat_actual_all, 
-                euclidean_flat_predicted_all, 
-                selected_flat_actual_all, 
-                selected_flat_predicted_all, 
-                #binary_flat_users1, 
-                #binary_flat_users2, 
-                #euclidean_flat_users1,
-                #euclidean_flat_users2, 
-                #selected_flat_users1, 
-                #selected_flat_users2
-                ]
-
-    return list_return
-
-list_ret = [0, 0]
-list_ret[0] = process_ws(10)
-list_ret[1] = process_ws(20)
-
-for i in range(len(list_ret)):
-    for ix in range(0, len(list_ret[i]), 2):
-        print("Algo", i, "List", ix, ix + 1)
-        #print(stats.normaltest(list_ret[i][ix]))
-        #print(stats.shapiro(list_ret[i][ix]))
-        #print(stats.kstest(list_ret[i][ix], 'norm'))
-
-        #print(stats.normaltest(list_ret[i][ix + 1]))
-        #print(stats.shapiro(list_ret[i][ix + 1]))
-        #print(stats.kstest(list_ret[i][ix + 1], 'norm'))
-
-        #print(stats.ttest_ind(list_ret[i][ix], list_ret[i][ix + 1], equal_var = False))
-        #print(stats.ranksums(list_ret[i][ix], list_ret[i][ix + 1]))
-        print(stats.mannwhitneyu(list_ret[i][ix], list_ret[i][ix + 1]))
-
-#for i in range(0, len(list_ret), 2):
-    #for ix in range(len(list_ret[i])):
-        #print("Algo", i, i + 1, "List", ix)
-        #print(stats.normaltest(list_ret[i][ix]))
-        #print(stats.shapiro(list_ret[i][ix]))
-        #print(stats.kstest(list_ret[i][ix], 'norm'))
-        
-        #print(stats.normaltest(list_ret[i + 1][ix]))
-        #print(stats.shapiro(list_ret[i + 1][ix]))
-        #print(stats.kstest(list_ret[i + 1][ix], 'norm'))
-
-        #print(stats.ttest_ind(list_ret[i][ix], list_ret[i + 1][ix], equal_var = False))
-        #print(stats.ranksums(list_ret[i][ix], list_ret[i + 1][ix]))
-        #print(stats.mannwhitneyu(list_ret[i][ix], list_ret[i + 1][ix]))
+for kp in pairs_to_test:
+    p = pairs_to_test[kp]
+    for ix in [0, 1]:
+        un, pvn = stats.normaltest(p[ix]) 
+        us, pvs = stats.shapiro(p[ix])
+        uk, pvk = stats.kstest(p[ix], 'norm')
+        #if pvn < 0.05 or pvs < 0.05 or pvk < 0.05:
+            #print(kp, "not normal for ws", ix)
+    #print(stats.ttest_ind(p[0], p[1], equal_var = False))
+    if False:
+        plt.figure()
+        plt.title(kp)
+        plt.hist(p[0], label = "10")
+        plt.hist(p[1], label = "20")
+        plt.legend()
+        plt.show()
+        plt.close()
+    urs, pvrs = stats.ranksums(p[0], p[1])
+    umw, pvmw = stats.mannwhitneyu(p[0], p[1])
+    #if pvn < 0.05 or pvs < 0.05 or pvk < 0.05:
+        #print(kp, "not equal for ws")
+        #print(urs, pvrs)
+        #print(umw, pvmw)
+        #print(np.mean(p[0]), np.mean(p[1]))
