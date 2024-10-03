@@ -43,9 +43,15 @@ def draw_dx(o, x0, y0, dx1, dx2, dy1, dy2):
     else:
         make_arrow(minx, 0, 0.1, angle = np.pi)
     plt.plot([x0, x1, x2], [y0, y1, y2], c = "k", linewidth = 2)
-    plt.scatter([x0], [y0], c = "r", zorder = 2, linewidth = 3)
-    plt.scatter([x1], [y1], c = "g", zorder = 2, linewidth = 3)
-    plt.scatter([x2], [y2], c = "b", zorder = 2, linewidth = 3)
+    if ord == 12:
+        plt.scatter([x0], [y0], c = "g", marker = "v", zorder = 2, linewidth = 3, label = "Before the inflection point")
+        plt.scatter([x1], [y1], c = "r", marker = "D", zorder = 2, linewidth = 3, label = "Inflection point")
+        plt.scatter([x2], [y2], c = "b", zorder = 2, linewidth = 3, label = "After the inflection point")
+        plt.legend(loc = "lower left", bbox_to_anchor = (0, -0.9))
+    else:
+        plt.scatter([x0], [y0], c = "g", marker = "v", zorder = 2, linewidth = 3)
+        plt.scatter([x1], [y1], c = "r", marker = "D", zorder = 2, linewidth = 3)
+        plt.scatter([x2], [y2], c = "b", zorder = 2, linewidth = 3)
 
 xs = 0
 ys = 0
