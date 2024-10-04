@@ -70,8 +70,6 @@ for ws in [10, 20]:
 
     for algo in ["DBSCAN", "KMeans"]:
 
-        image_names = []
-
         for num_clus in list_clus:
 
             if not os.path.isdir("clustered/" + algo + "/" + str(num_clus) + "/all_percent_1"):

@@ -1,6 +1,7 @@
 import os
 import pandas as pd
 import matplotlib.pyplot as plt
+import numpy as np
 
 list_clus = list(range(2, 21))
 for r in list(range(100, 121)):
@@ -18,8 +19,6 @@ for ws in [10, 20]:
 
     for algo in ["DBSCAN", "KMeans"]:
 
-        image_names = []
-
         for num_clus in list_clus:
 
             if not os.path.isdir("clustered/" + algo + "/" + str(num_clus) + "/all_percent_1"):
@@ -33,14 +32,24 @@ for ws in [10, 20]:
             comp1 = csv_df["TSNE_f1"]
             comp2 = csv_df["TSNE_f2"]
             cluster = csv_df["cluster"]
+            
+            cluster_size = {c: list(cluster).count(c) for c in list(cluster)}
+
+            cluster_size_keys = list(cluster_size.keys())
+            cluster_size_values= list(cluster_size.values())
+            max_key_ix = np.argmax(cluster_size_values)
+            max_key = cluster_size_keys[max_key_ix]
 
             point_dict = dict()
-            
+
             for ix_point in range(len(comp1)):
-                if cluster[ix_point] not in point_dict:
-                    point_dict[cluster[ix_point]] = {"x": [], "y": []}
-                point_dict[cluster[ix_point]]["x"].append(comp1[ix_point])
-                point_dict[cluster[ix_point]]["y"].append(comp2[ix_point])
+                marker = 0
+                if cluster[ix_point] != max_key:
+                    marker = 1
+                if marker not in point_dict:
+                    point_dict[marker] = {"x": [], "y": []}
+                point_dict[marker]["x"].append(comp1[ix_point])
+                point_dict[marker]["y"].append(comp2[ix_point])
 
             if algo not in maxcoord_algo_ws_num_clus:
                 maxcoord_algo_ws_num_clus[algo] = dict()
@@ -66,7 +75,6 @@ for ws in [10, 20]:
             maxcoord["x"] = (min(maxcoord["x"][0], min(comp1)), max(maxcoord["x"][1], max(comp2)))
             maxcoord["y"] = (min(maxcoord["y"][0], min(comp2)), max(maxcoord["y"][1], max(comp2)))
 
-
             if algo not in dict_for_plot:
                 dict_for_plot[algo] = dict()
 
@@ -74,8 +82,7 @@ for ws in [10, 20]:
                 dict_for_plot[algo][ws] = dict()
 
             dict_for_plot[algo][ws][num_clus] = {
-                "point_dict": point_dict,
-                "cluster_zorder": cluster_zorder
+                "point_dict": point_dict
             }
 
 mintotal = min(maxcoord["x"][0], maxcoord["y"][0])
@@ -88,7 +95,6 @@ for ws in [10, 20]:
         ix_ord = 1
         for num_clus in dict_for_plot[algo][ws]:
             point_dict = dict_for_plot[algo][ws][num_clus]["point_dict"]
-            cluster_zorder = dict_for_plot[algo][ws][num_clus]["cluster_zorder"]
             plt.subplot(5, 8, ix_ord)
             row = (ix_ord - 1) // 8
             col = (ix_ord - 1) % 8
@@ -118,25 +124,27 @@ for ws in [10, 20]:
             else:
                 plt.text(mintotal, maxtotal, str(num_clus) + " clusters")
             num_added = set()
-            for color_num in range(len(color_used)):
-                cluster_num = color_num - 1 * (-1 in point_dict)
+            for cluster_num in range(len(color_used)):
+                label_cluster_num = "Normal"
+                if cluster_num == 1:
+                    label_cluster_num = "Anomaly"
                 if cluster_num in point_dict:
                     plt.scatter(point_dict[cluster_num]["x"],
                                 point_dict[cluster_num]["y"],
                                 s = 1,
-                                zorder = cluster_zorder[cluster_num],
-                                c = color_used[color_num],
-                                label = str(color_num + 1))
+                                zorder = 4 - cluster_num,
+                                c = color_used[cluster_num],
+                                label = label_cluster_num)
                 else:
                     plt.scatter(0,
                                 0,
                                 s = 1,
                                 zorder = 2,
-                                c = color_used[color_num],
-                                label = str(color_num + 1))
+                                c = color_used[cluster_num],
+                                label = label_cluster_num)
             if row == 4 and col == 0:
-                plt.legend(ncol = 15, loc = "lower left", bbox_to_anchor = (-0.5, -2))
+                plt.legend(ncol = 2, loc = "lower left", bbox_to_anchor = (-0.5, -0.75))
             ix_ord += 1
         #plt.show()
-        plt.savefig(algo + "_" + str(ws) + "_all.png", bbox_inches = "tight")
+        plt.savefig(algo + "_" + str(ws) + "_all_2.png", bbox_inches = "tight")
         plt.close()

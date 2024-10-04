@@ -58,37 +58,48 @@ for subdir_name in os.listdir("marker_count"):
         
         X_embedded = TSNE(n_components=2, learning_rate='auto', init='random', perplexity=3).fit_transform(X)
         
-        distances_np = np.linalg.norm(X[:, None] - X, axis = 2)
-
         min_nbs = 400
 
         neighbors = NearestNeighbors(n_neighbors = min_nbs)
         neighbors_fit = neighbors.fit(X)
         distances, indices = neighbors_fit.kneighbors(X)
 
-        distances = np.sort(distances, axis=0)
-        distances = distances[:,1]
-        plt.plot([ix for ix in range(len(distances))], distances)
+        distances_sorted = np.sort(distances, axis=0)
+        distances_subset = distances_sorted[:,1]
+        plt.plot([ix for ix in range(len(distances_subset))], distances_subset)
         plt.show()
         plt.close()
 
-        # calculate and show knee/elbow
-        kneedle = kneed.KneeLocator([ix for ix in range(len(distances))], distances, curve = "convex", direction = "increasing")
+        kneedle = kneed.KneeLocator([ix for ix in range(len(distances_subset))], distances_subset, curve = "convex", direction = "increasing")
         knee_point = kneedle.knee
-        knee_point_dist = distances[knee_point]
+        knee_point_dist = distances_subset[knee_point]
         elbow_point = kneedle.elbow
-        elbow_point_dist = distances[knee_point]
+        elbow_point_dist = distances_subset[knee_point]
         print('Knee: ', knee_point, knee_point_dist) 
         print('Elbow: ', elbow_point, elbow_point_dist)
         kneedle.plot_knee()
         plt.show()
         plt.close()
 
+        if not os.path.isdir("clustered_new/elbow/" + str(min_nbs) + "/" + subdir_name):
+            os.makedirs("clustered_new/elbow/" + str(min_nbs) + "/" + subdir_name)
+
+        new_name_elbow = "clustered_new/elbow/" + str(min_nbs) + "/" + subdir_name + "/elbow_" + str(min_nbs) + "_" + csv_file
+
+        new_data_csv_elbow = {"knee_point": [knee_point for ix in range(len(distances[0]))], 
+                        "knee_point_dist": [knee_point_dist for ix in range(len(distances[0]))], 
+                        "elbow_point": [elbow_point for ix in range(len(distances[0]))], 
+                        "elbow_point_dist": [elbow_point_dist for ix in range(len(distances[0]))]}
+        print(len(distances), len(indices), len(distances[0]), len(indices[0]), np.shape(distances), np.shape(indices[0]))
+        for ix in range(len(distances)):
+            new_data_csv_elbow["distances " + str(ix)] = distances[ix]
+            new_data_csv_elbow["indices " + str(ix)] = indices[ix]
+                        
+        df_new_data_csv_elbow = pd.DataFrame(new_data_csv_elbow)
+        df_new_data_csv_elbow.to_csv(new_name_elbow, index = False)
+
         if not os.path.isdir("clustered_new/DBSCAN/" + str(min_nbs) + "/" + subdir_name):
             os.makedirs("clustered_new/DBSCAN/" + str(min_nbs) + "/" + subdir_name)
-
-        if not os.path.isdir("clustered_new/KMeans/" + str(min_nbs) + "/" + subdir_name):
-            os.makedirs("clustered_new/KMeans/" + str(min_nbs) + "/" + subdir_name)
 
         new_name_dbscan  = "clustered_new/DBSCAN/" + str(min_nbs) + "/" + subdir_name + "/clustered_DBSCAN_" + str(min_nbs) + "_" + csv_file
 
@@ -99,14 +110,19 @@ for subdir_name in os.listdir("marker_count"):
                         "TSNE_f1": [X_embedded[ix][0] for ix in range(len(list_labels_dbscan))], 
                         "TSNE_f2": [X_embedded[ix][1] for ix in range(len(list_labels_dbscan))]}
         df_new_data_csv_dbscan = pd.DataFrame(new_data_csv_dbscan)
-        df_new_data_csv_dbscan.to_csv(new_data_csv_dbscan, index = False)
+        df_new_data_csv_dbscan.to_csv(new_name_dbscan, index = False)
 
-        print(len(list_labels_dbscan))
+        num_clusters = len(set(list_labels_dbscan))
+        print(num_clusters)
         
+        if not os.path.isdir("clustered_new/KMeans/" + str(num_clusters) + "/" + subdir_name):
+            os.makedirs("clustered_new/KMeans/" + str(num_clusters) + "/" + subdir_name)
+
+        new_name_kmeans  = "clustered_new/KMeans/" + str(num_clusters) + "/" + subdir_name + "/clustered_KMeans_" + str(num_clusters) + "_" + csv_file
+
         kmeans = KMeans(n_clusters=len(list_labels_dbscan), random_state=0, n_init="auto").fit(X)
         list_labels_kmeans = list(kmeans.labels_)
-        new_name_kmeans  = "clustered_new/KMeans/" + str(len(list_labels_dbscan)) + "/" + subdir_name + "/clustered_DBSCAN_" + str(num_clus) + "_" + csv_file
-
+        
         new_data_csv_kmeans = {"vehicle": list(file_csv["vehicle"]), "ride": list(file_csv["ride"]), "cluster": list_labels_kmeans, 
                         "TSNE_f1": [X_embedded[ix][0] for ix in range(len(list_labels_kmeans))], 
                         "TSNE_f2": [X_embedded[ix][1] for ix in range(len(list_labels_kmeans))]}
