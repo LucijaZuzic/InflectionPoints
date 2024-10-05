@@ -1,0 +1,9 @@
+,ws,algo,num_clus,class,size
+0,10,DBSCAN,2,-1,1825
+1,10,DBSCAN,2,0,346
+2,10,KMeans,2,0,1095
+3,10,KMeans,2,1,1076
+4,20,DBSCAN,2,-1,739
+5,20,DBSCAN,2,0,1432
+6,20,KMeans,2,0,1443
+7,20,KMeans,2,1,728
