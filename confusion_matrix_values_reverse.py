@@ -230,9 +230,17 @@ def calculate_metrics(metric_set):
 def get_clusters_for_refere(file_cluster_name):
     pd_file = pd.read_csv(file_cluster_name, index_col = False)
     dicti_clus = dict()
-    add_val = int(-1 in pd_file["cluster"])
+    set_values_in_cluster = set(pd_file["cluster"])
+    list_values_in_cluster = list(pd_file["cluster"])
+    dict_values_in_cluster = {c: list_values_in_cluster.count(c) for c in set_values_in_cluster}
+    smaller_cluster_size = 1000000
+    smaller_cluster_name = ""
+    for c in dict_values_in_cluster:
+        if dict_values_in_cluster[c] < smaller_cluster_size:
+            smaller_cluster_size = dict_values_in_cluster[c]
+            smaller_cluster_name = c
     for ix in range(len(pd_file["cluster"])):
-        clus = pd_file["cluster"][ix] + add_val
+        clus = pd_file["cluster"][ix] == smaller_cluster_name
         vehicle = pd_file["vehicle"][ix]
         ride = pd_file["ride"][ix]
         refe = vehicle.split("_")[-1] + "_" + ride.split("_")[-1]
@@ -326,42 +334,42 @@ for model in values_metrics:
 print_dict = dict()
 for model in merge_by_user:
     if "clus" in model:
-        print_dict["User vs. Algo."] = dict()
+        print_dict["Algo vs. User"] = dict()
     else:
-        print_dict["User vs. " + model] = dict()
-        print_dict["Algo. vs. " + model] = dict()
+        print_dict[model + " vs. User"] = dict()
+        print_dict[model + " vs. Algo."] = dict()
     for ws in merge_by_user[model]:
         if "clus" in model:
-            print_dict["User vs. Algo."][ws] = merge_all[model][ws]
+            print_dict["Algo vs. User"][ws] = merge_all[model][ws]
             cm = calculate_metrics(merge_all[model][ws])
             for c in cm:
-                print_dict["User vs. Algo."][ws][c] = cm[c]
+                print_dict["Algo vs. User"][ws][c] = cm[c]
         else:
-            print_dict["User vs. " + model][ws] = merge_all_user[model][ws]
+            print_dict[model + " vs. User"][ws] = merge_all_user[model][ws]
             cm = calculate_metrics(merge_all_user[model][ws])
             for c in cm:
-                print_dict["User vs. " + model][ws][c] = cm[c]
-            print_dict["Algo. vs. " + model][ws] = merge_all_actual[model][ws]
+                print_dict[model + " vs. User"][ws][c] = cm[c]
+            print_dict[model + " vs. Algo."][ws] = merge_all_actual[model][ws]
             cm = calculate_metrics(merge_all_actual[model][ws])
             for c in cm:
-                print_dict["Algo. vs. " + model][ws][c] = cm[c]
+                print_dict[model + " vs. Algo."][ws][c] = cm[c]
                 
 str_pr = "Model"
 for model in print_dict:
-    if "knee" in model:
+    if "knee" in model or " vs. Algo." in model:
         continue
-    str_pr += " & \\multicolumn{" + str(len(print_dict[model])) + "}{|c|}{" + model.split("_")[0] + "}"
+    str_pr += " & \\multicolumn{" + str(len(print_dict[model])) + "}{c|}{" + model.replace("_elbow", "") + "}"
 print("\t\t" + str_pr + " \\\\ \\hline")
 str_pr = "Window size"
 for model in print_dict:
-    if "knee" in model:
+    if "knee" in model or " vs. Algo." in model:
         continue
     for ws in print_dict[model]:
         str_pr += " & $" + str(ws) + "$"
 print("\t\t" + str_pr + " \\\\ \\hline")
 str_pr = "P"
 for model in print_dict:
-    if "knee" in model:
+    if "knee" in model or " vs. Algo." in model:
         continue
     for ws in print_dict[model]:
         v = print_dict[model][ws]["TP"] + print_dict[model][ws]["FN"]
@@ -369,7 +377,7 @@ for model in print_dict:
 print("\t\t" + str_pr + " \\\\ \\hline")
 str_pr = "N"
 for model in print_dict:
-    if "knee" in model:
+    if "knee" in model or " vs. Algo." in model:
         continue
     for ws in print_dict[model]:
         v = print_dict[model][ws]["TN"] + print_dict[model][ws]["FP"]
@@ -377,16 +385,16 @@ for model in print_dict:
 print("\t\t" + str_pr + " \\\\ \\hline")
 str_pr = "T"
 for model in print_dict:
-    if "knee" in model:
+    if "knee" in model or " vs. Algo." in model:
         continue
     for ws in print_dict[model]:
         v = print_dict[model][ws]["TP"] + print_dict[model][ws]["FN"] + print_dict[model][ws]["TN"] + print_dict[model][ws]["FP"]
         str_pr += " & $" + str(v) + "$"
 print("\t\t" + str_pr + " \\\\ \\hline")
-for key_val in print_dict["User vs. Algo."][10]:
+for key_val in print_dict["Algo vs. User"][10]:
     str_pr = key_val
     for model in print_dict:
-        if "knee" in model:
+        if "knee" in model or " vs. Algo." in model:
             continue
         for ws in print_dict[model]:
             v = print_dict[model][ws][key_val]
